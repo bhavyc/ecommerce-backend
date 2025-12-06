@@ -13,3 +13,4 @@ const claimSchema = new mongoose.Schema({
 claimSchema.index({ user: 1, drop: 1 }, { unique: true });
 
 module.exports = mongoose.model("Claim", claimSchema);
+

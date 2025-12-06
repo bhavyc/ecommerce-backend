@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compare Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .compare-table th, .compare-table td {
+            vertical-align: middle;
+            text-align: center;
+            min-width: 200px;
+        }
+        .compare-table th:first-child, .compare-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .product-image {
+            max-width: 150px;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="container mt-5">
+
+    <h1 class="mb-4">Compare Products</h1>
+
+    <% if (!products || products.length < 1) { %>
+        <div class="alert alert-info">
+            You have not selected any products to compare. Please add at least two products.
+            <a href="/normal-deals/list" class="alert-link">Go to products</a>.
+        </div>
+    <% } else { %>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover compare-table bg-white">
+                <thead>
+                    <tr>
+                        <th class="bg-light">Feature</th>
+                        <% products.forEach(product => { %>
+                            <th>
+                                <img src="<%= product.image %>" alt="<%= product.title %>" class="product-image mb-2">
+                                <h5><%= product.title %></h5>
+                            </th>
+                        <% }) %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Price -->
+                    <tr>
+                        <td>Price</td>
+                        <% products.forEach(product => { %>
+                            <td><strong>₹<%= product.price.toFixed(2) %></strong></td>
+                        <% }) %>
+                    </tr>
+                    <!-- Description -->
+                    <tr>
+                        <td>Description</td>
+                        <% products.forEach(product => { %>
+                            <td><%= product.description %></td>
+                        <% }) %>
+                    </tr>
+                    <!-- Category -->
+                    <tr>
+                        <td>Category</td>
+                        <% products.forEach(product => { %>
+                            <td><%= product.category %></td>
+                        <% }) %>
+                    </tr>
+                    
+                    <!-- Add more rows for any other fields in your Product schema -->
+                    <!-- Example:
+                    <tr>
+                        <td>Brand</td>
+                        <% products.forEach(product => { %>
+                            <td><%= product.brand %></td>
+                        <% }) %>
+                    </tr>
+                    -->
+                    
+                    <!-- Action Buttons -->
+                    <tr>
+                        <td>Action</td>
+                        <% products.forEach(product => { %>
+                            <td>
+                                <form action="/cart/add" method="POST">
+                                    <input type="hidden" name="userId" value="<%= user ? user._id : '' %>">
+                                    <input type="hidden" name="itemId" value="<%= product._id %>">
+                                    <input type="hidden" name="itemType" value="NormalDeal"> <!-- Adjust if needed -->
+                                    <button type="submit" class="btn btn-success">Add to Cart</button>
+                                </form>
+                            </td>
+                        <% }) %>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+
+</body>
+</html>
+ 

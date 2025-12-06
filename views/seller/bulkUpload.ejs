@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bulk Upload Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f3f6f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e7d32;
+      color: #fff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 22px; margin: 0; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 15px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      transition: 0.3s;
+    }
+    nav a:hover { background: #ffffff30; }
+    nav a.logout { background:#b00020; }
+
+    main {
+      max-width: 700px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #1e7d32;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input[type="file"] {
+      padding: 12px;
+      border: 2px dashed #1e7d32;
+      border-radius: 8px;
+      background: #f8fdf8;
+      cursor: pointer;
+    }
+    button {
+      background: #1e7d32;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #145d23;
+      transform: scale(1.03);
+    }
+    .sample {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .sample a {
+      color: #1e7d32;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Bulk Product Upload</h1>
+  <nav>
+    <a href="/seller/dashboard">Dashboard</a>
+    <a href="/seller/inventory">Inventory</a>
+    <a href="/seller/auth/logout" class="logout">Logout</a>
+  </nav>
+</header>
+
+<main>
+  <h2>Upload Your Products via CSV</h2>
+  <form action="/seller/products/bulk-upload" method="POST" enctype="multipart/form-data">
+    <label>Select CSV File</label>
+    <input type="file" name="csvFile" accept=".csv" required>
+    <button type="submit">Upload Products</button>
+  </form>
+
+  <div class="sample">
+    <p>⚙️ CSV Format:</p>
+    <p><strong>title,description,category,price,discount,image</strong></p>
+    <p>Example: "T-shirt","Comfort Cotton Tee","Clothing",499,10,"https://example.com/image.jpg"</p>
+  </div>
+</main>
+
+</body>
+</html>

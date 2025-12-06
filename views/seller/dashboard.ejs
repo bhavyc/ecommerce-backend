@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="UTF-8" />
+  <title>Seller Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f7;
+      color: #333;
+    }
+
+    header {
+      background: #1e7d32;
+      color: #fff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 15px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      transition: all .3s ease;
+    }
+    nav a:hover { background: #ffffff30; transform: scale(1.05); }
+    nav a.logout { background:#b00020; }
+
+    main { padding: 40px; }
+    
+    h2 {
+      text-align: center;
+      color: #1e7d32;
+      font-size: 28px;
+      margin: 0 0 20px;
+    }
+                                
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+    .card h3 {
+      color: #1e7d32;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 24px;
+      font-weight: 700;
+      color: #145d23;
+      margin: 0;
+    }
+
+    .deals-stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .deal-box {
+      background: #e6f2ea;
+      color: #1e7d32;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .chart-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .chart-box h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #1e7d32;
+    }
+
+    .table-container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+
+    table.inventory {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #e6f2ea;
+      color: #145d23;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px;
+      border-bottom: 2px solid #cfe6d6;
+      z-index: 1;
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #eef3f6;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background: #f7faf9; }
+
+    .product-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+
+    .thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      flex: 0 0 auto;
+    }
+
+    .product-title {
+      font-weight: 600;
+      color: #1e7d32;
+      line-height: 1.25;
+    }
+     
+    .num { text-align: center; }
+
+    .btn {
+      background: #1e7d32;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .btn:hover { background: #145d23; }
+
+    .empty {
+      text-align: center;
+      padding: 28px;
+      color: #5f6b6f;
+      font-size: 15px;
+    }
+
+    .low-stock {
+      margin-top: 50px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .low-stock h3 {
+      color: #b00020;
+      margin-top: 0;
+    }
+    .low-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 8px 0;
+    }
+
+    @media (max-width: 768px) {
+      main { padding: 20px; }
+      header { padding: 16px 20px; }
+      header h1 { font-size: 20px; }
+      h2 { font-size: 22px; }
+      thead th, tbody td { font-size: 13px; padding: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Welcome, <%= user && user.name ? user.name : 'Seller' %></h1>
+    <nav>
+      <a href="/seller/add">Add Product</a>
+      <a href="/seller/inventory/add">Add Stock</a>
+        <a href="/sellers/products/bulk-upload">Bulk Upload</a>   
+      <a href="/seller/inventory">View Inventory</a>
+      <a href="/seller/auth/logout" class="logout">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="card"><h3>Total Products</h3><p><%= totalProducts || 0 %></p></div>
+      <div class="card"><h3>Total Stock</h3><p><%= stockCount || 0 %></p></div>
+      <div class="card"><h3>Total Orders</h3><p><%= totalOrders || 0 %></p></div>
+      <div class="card"><h3>Total Revenue</h3><p>₹<%= revenue || 0 %></p></div>
+    </div>
+
+    <div class="deals-stats">
+      <div class="deal-box">Normal Deals: <%= normalDeals || 0 %></div>
+      <div class="deal-box">24Hr Deals: <%= timedDeals || 0 %></div>
+      <div class="deal-box">Drops: <%= dropDeals || 0 %></div>
+    </div>
+
+    <!-- ===== CHART SECTION ===== -->
+    <div class="charts">
+      <div class="chart-box">
+        <h3>Monthly Sales (₹)</h3>
+        <canvas id="salesChart" height="200"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Top Products</h3>
+        <canvas id="topProductsChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <h2>Your Inventory</h2>
+
+    <div class="table-container">
+      <div class="table-wrap">
+        <table class="inventory">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Total</th>
+              <th>Sold</th>
+              <th>Remaining</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (inventory && inventory.length) { %>
+              <% inventory.forEach(item => { %>
+                <tr>
+                  <td>
+                    <div class="product-cell">
+                      <% if (item.product && item.product.image) { %>
+                        <img class="thumb" src="<%= item.product.image %>" alt="">
+                      <% } %>
+                      <span class="product-title"><%= item.product ? item.product.title : 'Untitled Product' %></span>
+                    </div>
+                  </td>
+                  <td class="num"><%= item.totalStock %></td>
+                  <td class="num"><%= item.sold %></td>
+                  <td class="num"><%= item.remaining %></td>
+                  <td><a href="/seller/inventory/restock/<%= item._id %>" class="btn">Restock</a></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="5" class="empty">No inventory yet — add your first product to get started.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% if (lowStock && lowStock.length) { %>
+      <div class="low-stock">
+        <h3>⚠️ Low Stock Alerts</h3>
+        <% lowStock.forEach(i => { %>
+          <div class="low-item">
+            <span><%= i.product ? i.product.title : 'Unknown Item' %></span>
+            <span><%= i.remaining || 0 %> left</span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+  <script>
+    // Line Chart - Sales
+    const ctx1 = document.getElementById('salesChart');
+    new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: <%- JSON.stringify(months || []) %>,
+        datasets: [{
+          label: 'Sales (₹)',
+          data: <%- JSON.stringify(salesData || []) %>,
+          borderColor: '#1e7d32',
+          backgroundColor: 'rgba(30,125,50,0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: true } } }
+    });
+
+    // Bar Chart - Top Products
+    const ctx2 = document.getElementById('topProductsChart');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(topProductNames || []) %>,
+        datasets: [{
+          label: 'Units Sold',
+          data: <%- JSON.stringify(topProductSales || []) %>,
+          backgroundColor: '#1e7d32'
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  </script>
+</body>
+</html>

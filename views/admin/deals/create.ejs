@@ -1,96 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Create 24-Hour Deal</title>
+  <title>Create 24Hr Deal</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: linear-gradient(135deg, #d0f0c0, #a8e6cf);
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-    }
-    .form-container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: #ffffffdd;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .form-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-    h2 {
-      text-align: center;
-      font-weight: 700;
-      color: #1b5e20;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    .btn-success {
-      background: linear-gradient(45deg, #43a047, #66bb6a);
-      border-radius: 50px;
-      font-weight: 600;
-      transition: all 0.3s;
-      width: 100%;
-    }
-    .btn-success:hover {
-      background: linear-gradient(45deg, #2e7d32, #388e3c);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      color: #fff;
-    }
-    .btn-secondary {
-      border-radius: 50px;
-      width: 100%;
-      margin-top: 10px;
-    }
-  </style>
 </head>
-<body>
-  <div class="form-container">
-    <h2>Create 24-Hour Deal</h2>
+<body class="bg-light">
 
-    <% if (error) { %>
-      <div class="alert alert-danger"><%= error %></div>
-    <% } %>
+<div class="container mt-5">
+  <div class="card shadow-lg">
+    <div class="card-header bg-success text-white">
+      <h4>Create New 24-Hour Deal</h4>
+    </div>
+    <div class="card-body">
+      
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
 
-    <form action="/api/admin/deals/create" method="POST">
-      <div class="mb-3">
-        <label class="form-label">Title</label>
-        <input type="text" name="title" class="form-control" required>
-      </div>
+      <form action="/admin/deals/create" method="POST">
+        
+        <!-- 🟢 1. Select Normal Deal -->
+        <div class="mb-4">
+          <label class="form-label fw-bold">Select from Normal Deals</label>
+          <select id="dealSelector" class="form-select" onchange="populateForm()">
+            <option value="">-- Select a Product --</option>
+            <% normalDeals.forEach(deal => { %>
+              <!-- Data attributes mein saari info store kar li -->
+              <option value="<%= deal._id %>" 
+                data-title="<%= deal.title %>"
+                data-desc="<%= deal.description %>"
+                data-image="<%= deal.image %>"
+                data-price="<%= deal.price %>"
+                data-discount="<%= deal.discount %>">
+                <%= deal.title %> (Price: ₹<%= deal.price %>)
+              </option>
+            <% }) %>
+          </select>
+          <small class="text-muted">Selecting a product will auto-fill the fields below.</small>
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea name="description" class="form-control"></textarea>
-      </div>
+        <hr>
 
-      <div class="mb-3">
-        <label class="form-label">Image URL</label>
-        <input type="text" name="image" class="form-control">
-      </div>
+        <!-- Auto-Filled Fields -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label>Title</label>
+            <input type="text" name="title" id="title" class="form-control" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Image URL</label>
+            <input type="text" name="image" id="image" class="form-control">
+          </div>
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Price</label>
-        <input type="number" step="0.01" name="price" class="form-control" required>
-      </div>
+        <div class="mb-3">
+          <label>Description</label>
+          <textarea name="description" id="description" class="form-control" rows="2"></textarea>
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Discount (%)</label>
-        <input type="number" name="discount" class="form-control" min="0" max="100">
-      </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label>Original Price (₹)</label>
+            <input type="number" name="price" id="price" class="form-control" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label>Discount (%)</label>
+            <input type="number" name="discount" id="discount" class="form-control" value="0">
+          </div>
+          <div class="col-md-4 mb-3 d-flex align-items-center">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="featured" id="featured">
+              <label class="form-check-label" for="featured">Mark as Featured</label>
+            </div>
+          </div>
+        </div>
 
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="featured" id="featured">
-        <label class="form-check-label" for="featured">Featured</label>
-      </div>
+        <!-- 🔥 3. Group Buy Section -->
+        <div class="card bg-light border-primary mt-3">
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="groupSwitch" name="isGroupBuyAvailable">
+              <label class="form-check-label fw-bold text-primary" for="groupSwitch">Enable Group Buying (Team Deal)</label>
+            </div>
 
-      <button type="submit" class="btn btn-success">Create Deal</button>
-      <a href="/api/admin/deals" class="btn btn-secondary">Cancel</a>
-    </form>
+            <div class="row" id="groupFields" style="display:none;">
+              <div class="col-md-6">
+                <label>Group Price (Must be lower)</label>
+                <input type="number" name="groupPrice" class="form-control" placeholder="e.g. 350">
+                <small class="text-muted">Users paying in a group pay this amount.</small>
+              </div>
+              <div class="col-md-6">
+                <label>Group Size</label>
+                <input type="number" name="groupSize" class="form-control" value="3">
+                <small class="text-muted">How many people needed to complete the deal?</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-center">
+          <button type="submit" class="btn btn-success w-50">Launch 24Hr Deal 🚀</button>
+          <a href="/api/admin/deals" class="btn btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
   </div>
+</div>
+
+<!-- JavaScript to Auto-Fill and Toggle -->
+<script>
+  // 1. Auto Fill Form
+  function populateForm() {
+    const selector = document.getElementById('dealSelector');
+    const selectedOption = selector.options[selector.selectedIndex];
+
+    if (selectedOption.value) {
+      document.getElementById('title').value = selectedOption.getAttribute('data-title');
+      document.getElementById('description').value = selectedOption.getAttribute('data-desc');
+      document.getElementById('image').value = selectedOption.getAttribute('data-image');
+      document.getElementById('price').value = selectedOption.getAttribute('data-price');
+      document.getElementById('discount').value = selectedOption.getAttribute('data-discount') || 0;
+    }
+  }
+
+  // 2. Toggle Group Fields
+  const groupSwitch = document.getElementById('groupSwitch');
+  const groupFields = document.getElementById('groupFields');
+
+  groupSwitch.addEventListener('change', function() {
+    groupFields.style.display = this.checked ? 'flex' : 'none';
+  });
+</script>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
  
 const Drop = require("../../models/FruitDrop");
-
+const NormalDeal = require("../../models/NormalDeal");
 // List all drops
 exports.listDrops = async (req, res) => {
   try {
@@ -13,23 +13,33 @@ exports.listDrops = async (req, res) => {
 };
 
 // Show create drop form
-exports.showCreateDrop = (req, res) => {
-  res.render("admin/drops/create", { error: null, user: req.user });
+// exports.showCreateDrop = (req, res) => {
+//   res.render("admin/drops/create", { error: null, user: req.user });
+// };
+ 
+exports.showCreateDrop = async (req, res) => {
+  try {
+    const normalDeals = await NormalDeal.find().sort({ createdAt: -1 });
+    res.render("admin/drops/create", { error: null, user: req.user, normalDeals });
+  } catch (err) {
+    res.render("admin/drops/create", { error: "Error fetching normal deals", user: req.user, normalDeals: [] });
+  }
 };
+// ... (listDrops, showCreateDrop waise hi rahenge) ...
 
 // Handle create drop form
 exports.createDrop = async (req, res) => {
-  const { title, description, image, startTime, endTime, price, featured, discount } = req.body;
+  // startTime aur endTime ko req.body se nikaal diya hai
+  const { title, description, image, price, featured, discount } = req.body;
 
   try {
     const drop = new Drop({
       title,
       description,
       image,
-      startTime,
-      endTime,
+      // startTime aur endTime yahan se bhi hata diye gaye hain
       price,
-      discount: discount || 0, // <-- save discount percentage
+      discount: discount || 0,
       featured: featured === "on" ? true : false,
     });
 
@@ -40,4 +50,3 @@ exports.createDrop = async (req, res) => {
     res.render("admin/drops/create", { error: err.message, user: req.user });
   }
 };
- 

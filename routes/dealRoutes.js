@@ -6,6 +6,6 @@ const {protect}= require("../middleware/authMiddleware")
 router.get("/deals",protect, userDealController.listActiveDeals);
 
 // Claim a deal
-router.post("/deals/:id/claim",protect, userDealController.claimDeal);
+// router.post("/deals/:id/claim",protect, userDealController.claimDeal);
 
 module.exports = router;

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Stock</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #1e7d32;
+      color: white;
+      padding: 20px 40px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      max-width: 500px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    form label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    form select, form input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    form select:focus, form input:focus {
+      border-color: #1e7d32;
+      box-shadow: 0 0 5px rgba(30,125,50,0.3);
+    }
+
+    button {
+      background: #1e7d32;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #145d23;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #1e7d32;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        margin: 20px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Add Stock</h1>
+  </header>
+
+  <main>
+    <form action="/seller/inventory/add" method="POST">
+      <label>Product:</label>
+      <select name="productId" required>
+          <% products.forEach(p => { %>
+              <option value="<%= p._id %>"><%= p.title %></option>
+          <% }) %>
+      </select>
+
+      <label>Quantity:</label>
+      <input type="number" name="totalStock" min="1" required />
+
+      <button type="submit">Add Stock</button>
+    </form>
+
+    <a href="/seller/dashboard">← Back to Dashboard</a>
+  </main>
+</body>
+</html>

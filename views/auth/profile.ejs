@@ -110,67 +110,57 @@
       margin-top: 5px;
     }
 
-    /* Scrollable Drop Lists - One item visible at a time */
-    .drop-list-wrapper {
-      height: 120px;       /* height of one item */
+    /* Scrollable Order List */
+    .order-list-wrapper {
+      max-height: 400px; /* Set a max height for scrolling */
       overflow-y: auto;
-      scroll-snap-type: y mandatory;
-      -webkit-overflow-scrolling: touch;
       border-radius: 10px;
       border: 1px solid #e0e0e0;
-      padding: 5px;
+      padding: 10px;
       background: #f9fafb;
     }
 
-    .drop-list-wrapper::-webkit-scrollbar {
-      width: 8px;
-    }
+    .order-list-wrapper::-webkit-scrollbar { width: 8px; }
+    .order-list-wrapper::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
+    .order-list-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
 
-    .drop-list-wrapper::-webkit-scrollbar-thumb {
-      background: #fbbf24;
-      border-radius: 10px;
-    }
+    .order-list { list-style: none; padding: 0; margin: 0; }
 
-    .drop-list-wrapper::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
-    }
-
-    .drop-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .drop-list li {
-      background: #f9fafb;
+    .order-list > li {
+      background: #fff;
       padding: 15px 20px;
       margin-bottom: 12px;
       border-left: 6px solid #fbbf24;
       border-radius: 15px;
-      transition: transform 0.2s, background 0.2s;
-      scroll-snap-align: start; /* scroll snapping */
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .drop-list li:hover {
+     .order-list > li:hover {
       transform: translateY(-3px);
-      background: #fff7ed;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.07);
     }
+    
+    .order-item-list { list-style-type: disc; padding-left: 25px; color: #555;}
+    .order-item-list li { margin-top: 5px; }
 
-    .drop-list li strong {
-      color: #1e3a8a;
-      font-size: 1.1rem;
+    .order-status {
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 0.85em;
     }
-
-    .drop-list li small {
-      color: #555;
-    }
+    .status-Pending { background-color: #fff3cd; color: #664d03; }
+    .status-Processing { background-color: #cfe2ff; color: #084298; }
+    .status-Shipped { background-color: #d1e7dd; color: #0f5132; }
+    .status-Delivered { background-color: #d1ecf1; color: #0c5460; }
+    .status-Cancelled { background-color: #f8d7da; color: #721c24; }
+    
 
     .btn-action {
       border-radius: 50px;
       padding: 0.5rem 1.5rem;
       font-weight: 600;
       transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
     }
 
     .btn-buy {
@@ -179,7 +169,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       margin-left: 10px;
     }
-
     .btn-buy:hover {
       background: linear-gradient(90deg, #f59e0b, #f97316);
       transform: translateY(-2px);
@@ -193,24 +182,22 @@
       margin-top: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-
     .btn-logout:hover {
       background: linear-gradient(90deg, #dc2626, #b91c1c);
       transform: translateY(-2px);
       box-shadow: 0 6px 18px rgba(0,0,0,0.2);
     }
 
-    .no-drops {
+    .no-data {
       color: #888;
       font-style: italic;
       text-align: center;
-      padding: 12px 0;
+      padding: 20px 0;
     }
 
     @media (max-width: 576px) {
       .header-card { flex-direction: column; text-align: center; gap: 15px; }
       .stats-box { min-width: 100%; display: flex; justify-content: space-around; margin-top:15px;}
-      .drop-list-wrapper { height: 100px; }
     }
   </style>
 </head>
@@ -226,8 +213,8 @@
           <p><strong>Email:</strong> <%= user.email %></p>
           <p>
             <strong>Membership:</strong>
-            <% if(user.isMember){ %>
-              <span class="badge-membership">Active (expires on <%= user.membershipExpiry ? user.membershipExpiry.toLocaleDateString() : "N/A" %>)</span>
+            <% if(user.isMember && user.membershipExpiry > new Date()){ %>
+              <span class="badge-membership">Active (expires on <%= user.membershipExpiry.toLocaleDateString() %>)</span>
             <% } else { %>
               <span style="color:#f97316;">Not Active</span>
               <form action="/membership/buy" method="POST" style="display:inline;">
@@ -239,53 +226,39 @@
 
         <!-- Stats -->
         <div class="stats-box">
-          <div>Total Claimed</div>
-          <div class="number"><%= claimedDrops.length %></div>
-          <div style="margin-top:8px;">Total Purchases</div>
-          <div class="number" style="color:#f59e0b;"><%= purchasedDeals.length %></div>
+          <div>Total Orders</div>
+          <div class="number"><%= orders.length %></div>
         </div>
       </div>
     </div>
 
-    <!-- Claimed Drops -->
+    <!-- Order History -->
     <div class="card-section">
-      <div class="section-title">Claimed Drops</div>
-      <% if(!claimedDrops || claimedDrops.length === 0){ %>
-        <p class="no-drops">You haven't claimed any drops yet.</p>
+      <div class="section-title">Order History</div>
+      <% if(!orders || orders.length === 0){ %>
+        <p class="no-data">You haven't placed any orders yet.</p>
       <% } else { %>
-        <div class="drop-list-wrapper">
-          <ul class="drop-list">
-            <% claimedDrops.forEach(claim => { %>
+        <div class="order-list-wrapper">
+          <ul class="order-list">
+            <% orders.forEach(order => { %>
               <li>
-                <strong><%= claim.drop.title %></strong><br>
-                <%= claim.drop.description || "" %><br>
-                <% if(user.isMember){ %>
-                  Price: ₹<%= claim.drop.price %><br>
-                <% } %>
-                <small>Claimed at: <%= claim.claimedAt.toLocaleString() %></small>
-              </li>
-            <% }) %>
-          </ul>
-        </div>
-      <% } %>
-    </div>
-
-    <!-- Purchased Deals -->
-    <div class="card-section">
-      <div class="section-title">Purchased Deals</div>
-      <% if(!purchasedDeals || purchasedDeals.length === 0){ %>
-        <p class="no-drops">You haven't purchased any deals yet.</p>
-      <% } else { %>
-        <div class="drop-list-wrapper">
-          <ul class="drop-list">
-            <% purchasedDeals.forEach(deal => { %>
-              <li>
-                <strong><%= deal.title %></strong><br>
-                <%= deal.description || "" %><br>
-                <% if(user.isMember){ %>
-                  Price Paid: ₹<%= deal.price - (deal.price * deal.discount / 100) %><br>
-                <% } %>
-                <small>Claimed at: <%= deal.updatedAt.toLocaleString() %></small>
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+                  <strong class="me-3" style="color: #1e3a8a;">Order #<%= order._id.toString().slice(-8).toUpperCase() %></strong>
+                  <span class="order-status status-<%= order.orderStatus %>"><%= order.orderStatus %></span>
+                </div>
+                <small class="d-block mb-2 text-muted">
+                  Placed on <%= order.placedAt.toLocaleString() %> | Total: <strong>₹<%= order.totalAmount.toFixed(2) %></strong>
+                </small>
+                
+                <ul class="order-item-list">
+                  <% order.items.forEach(item => { %>
+                    <li>
+                      <%= item.quantity %>x <%= item.title %> 
+                      at ₹<%= item.price.toFixed(2) %> each
+                      <% if(item.discount > 0) { %> ( -<%= item.discount %>% ) <% } %>
+                    </li>
+                  <% }) %>
+                </ul>
               </li>
             <% }) %>
           </ul>
@@ -294,7 +267,7 @@
     </div>
 
     <!-- Logout -->
-    <form action="/api/auth/logout" method="POST">
+    <form action="/auth/logout" method="POST">
       <button class="btn-logout btn-action">Logout</button>
     </form>
 

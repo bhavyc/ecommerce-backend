@@ -11,10 +11,12 @@ mongoose.connect(MONGO_URI)
 
 async function seedDeals() {
   try {
+
+    
     
     await Deal.deleteMany({});
     console.log("Old deals cleared ✅");
-
+    
     const now = new Date();
     const deals = [
       {

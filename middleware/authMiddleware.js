@@ -3,29 +3,61 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const JWT_SECRET = process.env.JWT_SECRET || "token";
 
-exports.protect = async (req, res, next) => {
-  try {
-    const token = req.cookies.token;
-    if (!token) return res.redirect("/api/auth/login");
+ 
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = await User.findById(decoded.id);
-    next();
-  } catch (err) {
-    console.error("Auth error:", err);
-    res.redirect("/api/auth/login");
-  }
-};
+// exports.protect = async (req, res, next) => {
+//   try {
+//     const token = req.cookies.userToken; // ✅ only user token
+//     if (!token) {
+//       return res.redirect("/api/auth/login");
+//     }
 
-// Membership required middleware
-// exports.requireMembership = (req, res, next) => {
-//   if (!req.user || !req.user.isMember) {
-//     return res.status(403).send("Membership required to access this feature.");
+//     const decoded = jwt.verify(token, JWT_SECRET);
+//     const user = await User.findById(decoded.id);
+//     if (!user || user.role !== "user") {
+//       return res.redirect("/api/auth/login");
+//     }
+
+//     req.user = user;
+//     next();
+//   } catch (err) {
+//     console.error("User Auth Error:", err);
+//     res.redirect("/api/auth/login");
 //   }
-//   next();
 // };
 
+ 
 
+exports.protect = (req, res, next) => {
+  let token;
+
+  // 1. Check Authorization Header
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+  } 
+  // 2. Check Cookies (Optional backup)
+  else if (req.cookies && req.cookies.userToken) {
+    token = req.cookies.userToken;
+  }
+
+  // ❌ GALAT (Old EJS Style): Yeh hatana hai
+  // if (!token) return res.redirect('/login'); 
+
+  // ✅ SAHI (API Style): JSON Error bhejo
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Not authorized to access this route" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    // ❌ GALAT: res.redirect('/login');
+    // ✅ SAHI:
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
  
 
 exports.requireMembership = async (req, res, next) => {

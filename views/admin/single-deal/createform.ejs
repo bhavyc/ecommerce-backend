@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Deal or Drop from NewDeal</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #e8f8e5, #c9efd3);
+        font-family: "Poppins", sans-serif;
+        padding: 40px 0;
+        color: #2f4f2f;
+      }
+
+      .container {
+        max-width: 700px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0px 4px 20px rgba(34, 139, 34, 0.2);
+        padding: 40px;
+        animation: fadeIn 0.8s ease-in-out;
+      }
+
+      h1 {
+        text-align: center;
+        color: #1b5e20;
+        font-weight: 700;
+        margin-bottom: 25px;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #2e7d32;
+      }
+
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+        border: 1px solid #a5d6a7;
+        transition: all 0.2s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #43a047;
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+      }
+
+      .btn-primary {
+        background-color: #43a047;
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        width: 100%;
+        padding: 12px;
+        font-weight: 600;
+      }
+
+      .btn-primary:hover {
+        background-color: #2e7d32;
+        transform: scale(1.03);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Create Deal or Drop from NewDeal</h1>
+
+      <form
+        id="dealForm"
+        action="/admin/single-deals/createFromNewDeal"
+        method="POST"
+      >
+        <!-- Select NewDeal -->
+        <div class="mb-3">
+          <label class="form-label">Select NewDeal</label>
+          <select
+            id="newDealSelect"
+            class="form-select"
+            name="newDealId"
+            required
+          >
+            <option value="" disabled selected>Select a NewDeal</option>
+            <% newDeals.forEach(deal => { %>
+            <option value="<%= deal._id %>"><%= deal.title %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Select Target Model -->
+        <div class="mb-3">
+          <label class="form-label">Create as</label>
+          <select id="targetType" class="form-select" name="type" required>
+            <option value="deal">24hr Deal</option>
+            <option value="drop">Drop</option>
+          </select>
+        </div>
+
+        <hr />
+
+        <!-- Pre-filled Fields -->
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" id="title" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            id="description"
+            class="form-control"
+            rows="3"
+            readonly
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Image URL</label>
+          <input type="text" id="image" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Price</label>
+          <input type="number" id="price" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3 form-check">
+          <input
+            type="checkbox"
+            id="featured"
+            class="form-check-input"
+            disabled
+          />
+          <label class="form-check-label">Featured</label>
+        </div>
+
+        <!-- Discount -->
+        <div class="mb-3">
+          <label class="form-label">Discount (%)</label>
+          <input
+            type="number"
+            name="discount"
+            class="form-control"
+            placeholder="Enter discount if any"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Create</button>
+      </form>
+    </div>
+
+    <script>
+      const newDealsData = <%- JSON.stringify(newDeals) %>;
+
+      const newDealSelect = document.getElementById("newDealSelect");
+      const targetType = document.getElementById("targetType");
+
+      newDealSelect.addEventListener("change", updateFields);
+      targetType.addEventListener("change", updateFields);
+
+      function updateFields() {
+        const selectedId = newDealSelect.value;
+        const deal = newDealsData.find(d => d._id === selectedId);
+        if (!deal) return;
+
+        document.getElementById("title").value = deal.title;
+        document.getElementById("description").value = deal.description || "";
+        document.getElementById("image").value = deal.image || "";
+        document.getElementById("price").value = deal.price || "";
+        document.getElementById("featured").checked = !!deal.featured;
+      }
+    </script>
+  </body>
+</html>

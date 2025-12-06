@@ -12,7 +12,7 @@
     <div class="alert alert-danger"><%= error %></div>
   <% } %>
 
-  <form action="/api/admin/normal-deals/<%= deal._id %>?_method=PUT" method="POST">
+  <form action="/admin/normal-deals/<%= deal._id %>?_method=PUT" method="POST">
     <div class="mb-3">
       <label class="form-label">Title</label>
       <input type="text" name="title" class="form-control" value="<%= deal.title %>" required>
@@ -36,6 +36,6 @@
     <button type="submit" class="btn btn-primary">Update Deal</button>
   </form>
 
-  <a href="/api/admin/normal-deals" class="btn btn-secondary mt-3">Back to List</a>
+  <a href="/admin/normal-deals" class="btn btn-secondary mt-3">Back to List</a>
 </body>
 </html>

@@ -1,20 +1,30 @@
+// // controllers/membershipController.js
+
 const User = require("../models/User");
+const Drop = require("../models/FruitDrop"); // Admin ke drops ka model
+const WelcomeDrop = require("../models/WelcomeDrop"); // Hamara naya model
 
 // Buy membership
 exports.buyMembership = async (req, res) => {
   try {
+
+
+    console.log("🔥 POST /membership/buy route hit!");
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).send("User not found");
 
-    // Set membership active for 30 days
-    user.isMember = true;
-    user.membershipExpiry = new Date(Date.now() + 30*24*60*60*1000);
-    await user.save();
+    if (user.isMember && user.membershipExpiry > new Date()) {
+      return res.redirect("/drops");
+    }
 
-    // Redirect back to profile
-    res.redirect("/api/auth/profile");
+    user.isMember = true;
+    user.membershipExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    // timedDropStart wali line yahan se HATA DI GAYI HAI
+
+    await user.save();
+    res.redirect("/drops");
   } catch (err) {
-    console.error("Membership buy error:", err);
-    res.status(500).send("Something went wrong. Try again.");
+    // ... error handling
   }
 };

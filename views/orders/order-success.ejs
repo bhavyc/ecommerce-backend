@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Success</title>
+</head>
+<body>
+  <h1>✅ Order Placed Successfully!</h1>
+  <p>Thank you, your order has been placed successfully.</p>
+  <p><b>Order ID:</b> <%= order._id %></p>
+  <p><b>Total:</b> ₹<%= order.totalAmount %></p>
+  <a href="/orders/<%= order.user %>">View My Orders</a>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Success 🎉</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #d0f8ce, #a5d6a7);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      text-align: center;
+      max-width: 450px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .checkmark {
+      font-size: 70px;
+      color: #2e7d32;
+      margin-bottom: 20px;
+      animation: pop 0.5s ease-in-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      80% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    h1 {
+      color: #1b5e20;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .order-info {
+      background: #e8f5e9;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .btn-view {
+      background: linear-gradient(45deg, #43a047, #66bb6a);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 25px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-view:hover {
+      background: linear-gradient(45deg, #2e7d32, #388e3c);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      transform: translateY(-3px);
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: #777;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="success-card">
+    <div class="checkmark">✅</div>
+    <h1>Order Placed Successfully!</h1>
+    <p>Thank you for shopping with us 🎉</p>
+
+    <div class="order-info">
+      <p><b>Order ID:</b> <%= order._id %></p>
+      <p><b>Total Amount:</b> ₹<%= order.totalAmount %></p>
+    </div>
+
+    <a href="/orders/<%= order.user %>" class="btn-view">View My Orders</a>
+
+    <div class="footer">
+      <p>We'll notify you once your order is shipped 🚚</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

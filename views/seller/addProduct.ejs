@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Product</title>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f4f6f8; color: #333; margin: 0; padding: 0; }
+    header { background: #1e7d32; color: white; padding: 20px 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    main { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    form label { display: block; margin-bottom: 6px; font-weight: 500; }
+    form input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; outline: none; }
+    form input:focus { border-color: #1e7d32; box-shadow: 0 0 5px rgba(30,125,50,0.3); }
+    button { background: #1e7d32; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #145d23; }
+    a { display: inline-block; margin-top: 20px; color: #1e7d32; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Add New Product</h1>
+  </header>
+
+  <main>
+    <form action="/seller/add" method="POST">
+      <label>Title:</label>
+      <input type="text" name="title" required />
+
+      <label>Description:</label>
+      <input type="text" name="description" required />
+
+      <label>Price:</label>
+      <input type="number" name="price" min="1" required />
+
+      <label>Image URL:</label>
+      <input type="text" name="image" required />
+
+      <label>Discount (%):</label>
+      <input type="number" name="discount" min="0" max="100" />
+
+      <button type="submit">Add Product</button>
+    </form>
+
+    <a href="/seller/dashboard">← Back to Dashboard</a>
+  </main>
+</body>
+</html>

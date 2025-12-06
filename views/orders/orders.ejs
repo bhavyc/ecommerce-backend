@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Orders</title>
+</head>
+<body>
+  <h1>My Orders</h1>
+
+  <% if (orders.length > 0) { %>
+    <% orders.forEach(order => { %>
+      <div style="border:1px solid #ccc; margin-bottom:20px; padding:10px;">
+        <h3>Order ID: <%= order._id %></h3>
+        <p>Status: <%= order.orderStatus %> | Payment: <%= order.paymentStatus %></p>
+        <p>Placed On: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+        <p>Total: ₹<%= order.totalAmount %></p>
+
+        <details>
+          <summary>View Items</summary>
+          <ul>
+            <% order.items.forEach(item => { %>
+              <li>
+                <img src="<%= item.image %>" width="50">
+                <%= item.title %> - <%= item.quantity %> x ₹<%= item.price %>
+              </li>
+            <% }) %>
+          </ul>
+        </details>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No orders found.</p>
+  <% } %>
+
+</body>
+</html>

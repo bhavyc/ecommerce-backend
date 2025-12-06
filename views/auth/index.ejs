@@ -21,7 +21,7 @@
       border-radius: 20px;
       box-shadow: 0px 4px 15px rgba(0, 128, 0, 0.2);
       width: 100%;
-      max-width: 700px;
+      max-width: 900px; /* Increased max-width to accommodate order list */
     }
     h1 {
       color: #2e7d32;
@@ -31,6 +31,8 @@
     h2 {
       color: #388e3c;
       margin-top: 25px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8f5e9;
     }
     .user-info {
       background: #f1f8f1;
@@ -38,24 +40,41 @@
       border-radius: 12px;
       margin-bottom: 20px;
     }
-    .drop-list {
+    .order-list {
       list-style: none;
       padding: 0;
     }
-    .drop-list li {
+    .order-list li {
       background: #e8f5e9;
-      margin: 8px 0;
-      padding: 12px;
+      margin: 15px 0;
+      padding: 15px;
       border-radius: 10px;
       border-left: 5px solid #2e7d32;
     }
-    .no-drops {
+    .no-data {
       color: #777;
       font-style: italic;
     }
     .btn-buy {
       margin-top: 10px;
     }
+    .order-item-list {
+      list-style: disc;
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+    .order-status {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 5px;
+        display: inline-block;
+        font-size: 0.9em;
+    }
+    .status-Pending { background-color: #fff3cd; color: #664d03; }
+    .status-Processing { background-color: #cfe2ff; color: #084298; }
+    .status-Shipped { background-color: #d1e7dd; color: #0f5132; }
+    .status-Delivered { background-color: #d1ecf1; color: #0c5460; }
+    .status-Cancelled { background-color: #f8d7da; color: #721c24; }
   </style>
 </head>
 <body>
@@ -65,39 +84,58 @@
     <!-- User Info + Membership -->
     <div class="user-info">
       <p><strong>Email:</strong> <%= user.email %></p>
-      <p><strong>Membership:</strong> 
-        <% if(user.isMember){ %>
-          Active (expires on <%= user.membershipExpiry ? user.membershipExpiry.toLocaleDateString() : "N/A" %>)
+      <p><strong>Role:</strong> <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></p>
+      <p>
+        <strong>Membership:</strong> 
+        <% if(user.isMember && user.membershipExpiry > new Date()){ %>
+          <span class="badge bg-success">Active</span> (expires on <%= user.membershipExpiry.toLocaleDateString() %>)
         <% } else { %>
-          Not Active
-          <form action="/membership/buy" method="POST" style="display:inline;">
+          <span class="badge bg-danger">Not Active</span>
+          <form action="/membership/buy" method="POST" style="display:inline;" class="ms-3">
             <button class="btn btn-sm btn-success btn-buy">Buy Membership</button>
           </form>
         <% } %>
       </p>
     </div>
 
-    <!-- Claimed Drops -->
-    <h2>Claimed Drops</h2>
-    <% if(claimedDrops.length === 0){ %>
-      <p class="no-drops">You haven't claimed any drops yet.</p>
+    <!-- User Orders -->
+    <h2>Your Orders</h2>
+    <% if(orders.length === 0){ %>
+      <p class="no-data">You haven't placed any orders yet.</p>
     <% } else { %>
-      <ul class="drop-list">
-        <% claimedDrops.forEach(claim => { %>
+      <ul class="order-list">
+        <% orders.forEach(order => { %>
           <li>
-            <strong><%= claim.drop.title %></strong><br>
-            <%= claim.drop.description ? claim.drop.description : "" %><br>
-            <% if(user.isMember){ %>
-              Price: ₹<%= claim.drop.price %><br>
-            <% } %>
-            <small>Claimed at: <%= claim.claimedAt.toLocaleString() %></small>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Order ID:</strong> <%= order._id.toString().slice(-8) %>
+                <span class="order-status status-<%= order.orderStatus %>"><%= order.orderStatus %></span>
+            </div>
+            
+            <p class="mb-1">
+                <strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %> | 
+                <strong>Placed At:</strong> <%= order.placedAt.toLocaleString() %>
+            </p>
+            
+            <h6>Items:</h6>
+            <ul class="order-item-list">
+                <% order.items.forEach(item => { %>
+                    <li>
+                        <%= item.title %> (<%= item.itemType %>) - 
+                        Qty: <%= item.quantity %>, 
+                        Price: ₹<%= item.price %> 
+                        <% if(item.discount > 0) { %>
+                           (<%= item.discount %>% off)
+                        <% } %>
+                    </li>
+                <% }) %>
+            </ul>
           </li>
         <% }) %>
       </ul>
     <% } %>
 
     <!-- Logout -->
-    <form action="/api/auth/logout" method="POST" class="mt-3">
+    <form action="/auth/logout" method="POST" class="mt-3">
       <button class="btn btn-danger">Logout</button>
     </form>
   </div>

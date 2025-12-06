@@ -1,4 +1,3 @@
-// index.js
 require('dotenv').config(); // Load .env variables
 
 const express = require("express");
@@ -7,13 +6,14 @@ const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const cron = require("node-cron");
- 
+const cors = require("cors");
 const User = require("./models/User");
 const Drop = require("./models/FruitDrop");
+const { startAutomation, generateDailyDeals, generateFreshDrop } = require("./utils/automationEngine");
+// const Product = require("./models/Product");
 
-// Routes
+// ------------------ ROUTES ------------------
 const authRoutes = require("./routes/authRoutes");
 const membershipRoutes = require("./routes/membershipRoutes");
 const dropRoutes = require("./routes/dropRoutes");
@@ -23,23 +23,39 @@ const adminDealRoutes = require("./routes/admin/adminDealRoutes");
 const adminAnalyticsRoutes = require("./routes/admin/adminAnalyticsRoutes");
 const dealRoutes = require("./routes/dealRoutes");
 const normalDealRoutes = require("./routes/normalDealRoutes");
-const googleAuthRoutes = require("./routes/googleRoutes"); // Google auth routes
+const googleAuthRoutes = require("./routes/googleRoutes");
 const adminNormalDealRoutes = require("./routes/admin/adminNormalDealRoutes");
-const app = express();
+const adminMultiDealRoutes = require("./routes/admin/adminmultiDealController");
+const adminSingleDealRoutes = require("./routes/admin/adminSingleDealRoute");
+const adminSellerRoutes = require("./routes/admin/adminSellerRoutes");
+const sellerAuthRoutes = require("./routes/seller/sellerAuthRoutes");
+const sellerRoutes = require("./routes/seller/sellerRoutes");
+const cartRoutes= require("./routes/cartRoutes");
+const orderRoutes=require("./routes/orderRoutes");
+const seller=require("./routes/seller/seller");
+const orderHistoryRoutes = require("./routes/orderHistoryRoutes");
+const apiRoutes = require("./routes/Api/api_routes");
+const app = express(); 
 
-// Connect DB
+// ------------------ CONNECT DATABASE ------------------
 connectDB();
-
-// View engine
+app.use(cors({
+  origin: "http://localhost:5173", // Tera Frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true // Agar cookies/headers use kar raha hai toh zaruri hai
+}));
+startAutomation(); // Start the automation engine
+generateDailyDeals();
+generateFreshDrop();
+// ------------------ VIEW ENGINE ------------------
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
-// Middleware
+// ------------------ MIDDLEWARE ------------------
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session + Passport middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -48,56 +64,49 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ------------------ PASSPORT GOOGLE ------------------
-// passport.use(new GoogleStrategy({
-//   clientID: process.env.GOOGLE_CLIENT_ID,
-//   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//   callbackURL: "http://localhost:5000/auth/google/callback"
-// }, async (accessToken, refreshToken, profile, done) => {
-//   try {
-//     let user = await User.findOne({ googleId: profile.id });
-
-//     if (!user) {
-//       user = await User.create({
-//         name: profile.displayName,
-//         email: profile.emails[0].value,
-//         googleId: profile.id,
-//         avatar: profile.photos[0].value
-//       });
-//     }
-
-//     done(null, user);
-//   } catch (err) {
-//     done(err, null);
-//   }
-// }));
-
-// passport.serializeUser((user, done) => done(null, user.id));
-// passport.deserializeUser(async (id, done) => {
-//   const user = await User.findById(id);
-//   done(null, user);
-// });
-
-// ------------------ ROUTES ------------------
-app.use("/api/auth", authRoutes);
+// ------------------ ROUTES (without /api prefix) ------------------
+app.use("/uploads", express.static("uploads"));
+app.use("/auth", authRoutes);
 app.use("/membership", membershipRoutes);
 app.use("/drops", dropRoutes);
-app.use("/api/admin", adminAuthRoutes);
-app.use("/api/admin/drops", adminDropRoutes);
-app.use("/api/admin/deals", adminDealRoutes);
-app.use("/api/admin", adminAnalyticsRoutes);
-app.use("/api", dealRoutes);
+
+app.use("/admin", adminAuthRoutes);
+app.use("/admin/drops", adminDropRoutes);
+app.use("/admin/deals", adminDealRoutes);
+app.use("/admin", adminAnalyticsRoutes);
+app.use("/deals", dealRoutes);
 app.use("/auth/google", googleAuthRoutes);
-app.use("/api/normal-deals", normalDealRoutes);
-app.use("/api/admin/normal-deals", adminNormalDealRoutes);
-// Home redirect
+app.use("/normal-deals", normalDealRoutes);
+app.use("/admin/normal-deals", adminNormalDealRoutes);
+app.use("/admin/multi-deals", adminMultiDealRoutes);
+app.use("/admin/single-deals", adminSingleDealRoutes);
+app.use("/seller/auth", sellerAuthRoutes);
+app.use("/seller", sellerRoutes);
+app.use("/admin/sellers", adminSellerRoutes);
+app.use("/cart", cartRoutes);
+app.use("/order", orderRoutes);
+app.use("/sellers", seller);
+app.use("/orders", orderHistoryRoutes); 
+app.use("/compare", require("./routes/compareNormalDealRoutes"));
+app.use("/analytics", require("./routes/analyticsExpense"));
+app.use("/qa", require("./routes/productQARoutes"));
+app.use("/group", require("./routes/groupRoutes"));
+// app.use("/razorpay", require("./routes/razorpayRoutes"));
+app.use("/wallet", require("./routes/walletRoutes"));
+
+
+
+// Mount all routes under /api
+app.use("/api", apiRoutes);
+// ------------------ HOME ROUTES ------------------
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
-    return res.redirect("/drops"); // redirect logged in users
+    return res.redirect("/drops");
   }
   res.render("auth/login");
 });
-app.get("/admin", (req, res) => res.redirect("/api/admin/login"));
+
+app.get("/admin", (req, res) => res.redirect("/admin/login"));
 
 // ------------------ CRON JOB ------------------
 cron.schedule("* * * * *", async () => {
@@ -115,62 +124,6 @@ cron.schedule("* * * * *", async () => {
 
 // ------------------ START SERVER ------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
-
-// const express = require("express");
-// const bodyParser = require("body-parser");
-// const connectDB = require("./config/db");
-// const authRoutes = require("./routes/authRoutes");
-// const cookieParser = require("cookie-parser");
-// const app = express();
-// const User = require("./models/User");
-// const Drop = require("./models/FruitDrop"); // ✅ Import Drop model
-// const cron = require("node-cron");          // ✅ Import node-cron
-
-// // Connect DB
-// connectDB();
-
-// // View engine
-// app.set("view engine", "ejs");
-// app.set("views", __dirname + "/views");
-
-// // Middleware
-// app.use(cookieParser());
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-
-// // Routes
-// app.use("/api/auth", authRoutes);
-// app.use("/membership", require("./routes/membershipRoutes"));
-// app.use("/drops", require("./routes/dropRoutes"));
-// app.use("/api/admin", require("./routes/admin/authRoutes"));
-// app.use("/api/admin/drops", require("./routes/admin/adminDropRoutes"));
-// app.use("/api/admin/deals", require("./routes/admin/adminDealRoutes"));
-// app.use("/api/admin", require("./routes/admin/adminAnalyticsRoutes"));
+app.listen(PORT, () => 
  
-// app.use("/api", require("./routes/dealRoutes"));
-// // Home redirect
-// app.get("/", (req, res) => res.render("auth/login"));
-// app.get("/admin", (req, res) => res.redirect("/api/admin/login"));
-
-// // ------------------ CRON JOB ------------------
-// // This will run every minute and delete expired drops
-// cron.schedule("* * * * *", async () => {
-//   try {
-//     console.log("****")
-//     const now = new Date();
-//     const result = await Drop.deleteMany({ endTime: { $lte: now } });
-//     if (result.deletedCount > 0) {
-//       console.log(`Deleted ${result.deletedCount} expired drops`);
-//     }
-//   } catch (err) {
-//     console.error("Error deleting expired drops:", err);
-//   }
-// });
-// // ------------------------------------------------
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  console.log(`Server running on port ${PORT}`));

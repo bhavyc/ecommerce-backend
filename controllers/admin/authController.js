@@ -29,8 +29,15 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.render("admin/login", { error: "Invalid credentials" });
 
     const token = generateToken(user);
-    res.cookie("adminToken", token, { httpOnly: true });
-    res.redirect("/api/admin/dashboard");
+   res.cookie("adminToken", token, {
+  httpOnly: true,
+  path: "/",         // make it available to all routes
+  sameSite: "lax",   // allow browser to send cookie with requests
+  secure: false,     // false for localhost
+  maxAge: 24*60*60*1000
+});
+
+    res.redirect("/admin/dashboard");
   } catch (err) {
     res.render("admin/login", { error: err.message });
   }
@@ -39,7 +46,7 @@ exports.login = async (req, res) => {
 //   ADMIN PROTECT MIDDLEWARE  
 exports.protect = (req, res, next) => {
   const token = req.cookies.adminToken;
-  if (!token) return res.redirect("/api/admin/login");
+  if (!token) return res.redirect("/admin/login");
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -49,7 +56,7 @@ exports.protect = (req, res, next) => {
     next();
   } catch (err) {
     console.error("JWT Error:", err);
-    return res.redirect("/api/admin/login");
+    return res.redirect("/admin/login");
   }
 };
 
@@ -105,5 +112,73 @@ exports.register = async (req, res) => {
 //   ADMIN LOGOUT  
 exports.logout = (req, res) => {
   res.clearCookie("adminToken");
-  res.redirect("/api/admin/login");
+  res.redirect("/admin/login");
+};
+
+
+
+
+// =========================
+//   VIEW ALL SELLERS
+// =========================
+exports.viewSellers = async (req, res) => {
+  try {
+    const sellers = await User.find({ role: "seller" }).select("name email createdAt");
+    res.render("admin/seller/seller", { user: req.user, sellers });
+  } catch (err) {
+    console.error("Error fetching sellers:", err);
+    res.send("Error loading sellers list");
+  }
+};
+
+// =========================
+//   DELETE SELLER
+// =========================
+exports.deleteSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const seller = await User.findById(id);
+
+    if (!seller || seller.role !== "seller") {
+      return res.status(404).send("Seller not found");
+    }
+
+    await User.findByIdAndDelete(id);
+    res.redirect("/admin/sellers");
+  } catch (err) {
+    console.error("Error deleting seller:", err);
+    res.status(500).send("Error deleting seller");
+  }
+};
+
+
+exports.getSellers = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // 10 sellers per page
+
+    const query = { role: "seller" };
+    if (search) {
+      query.name = { $regex: search, $options: "i" }; // case-insensitive search
+    }
+
+    const totalSellers = await User.countDocuments(query);
+    const totalPages = Math.ceil(totalSellers / limit);
+
+    const sellers = await User.find(query)
+      .sort({ createdAt: -1 }) // newest first
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.render("admin/seller/seller", {
+      sellers,
+      search,
+      currentPage: page,
+      totalPages
+    });
+  } catch (err) {
+    console.error("Error fetching sellers:", err);
+    res.send("Error fetching sellers");
+  }
 };

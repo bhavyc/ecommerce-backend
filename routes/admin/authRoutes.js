@@ -19,4 +19,8 @@ router.get("/dashboard", adminController.protect, adminController.dashboard);
 router.get("/register", adminController.showRegister);
 router.post("/register", adminController.register);
 
+router.get("/sellers", adminController.getSellers);
+
+// Delete seller
+router.get("/delete-seller/:id", adminController.deleteSeller);
 module.exports = router;

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <style>
+    table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    img { width: 100px; height: auto; }
+    .remove { color: red; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center;">Compare Normal Deals</h1>
+  <table>
+    
+    <tr>
+      <th>Image</th>
+      <% items.forEach(i => { %>
+        <td><img src="<%= i.image %>" alt="<%= i.title %>"></td>
+      <% }) %>
+    </tr>
+    <tr>
+      <th>Title</th>
+      <% items.forEach(i => { %>
+        <td><%= i.title %></td>
+      <% }) %>
+    </tr>
+    <tr>
+      <th>Price</th>
+      <% items.forEach(i => { %>
+        <td>₹<%= i.price %></td>
+      <% }) %>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <% items.forEach(i => { %>
+        <td><%= i.description %></td>
+      <% }) %>
+    </tr>
+    <tr>
+      <th>Actions</th>
+      <% items.forEach(i => { %>
+        <td><a href="/compare/remove/<%= i.deal._id %>" class="remove">Remove</a></td>
+      <% }) %>
+    </tr>
+  </table>
+
+  <div style="text-align:center;">
+    <a href="/compare/clear">Clear All</a>
+  </div>
+</body>
+</html>

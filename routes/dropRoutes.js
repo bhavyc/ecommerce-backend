@@ -11,6 +11,6 @@ router.get("/", protect, dropController.listDrops);
 router.get("/:id", protect, dropController.showDrop);
 
 // Claim a drop
-router.post("/:id/claim", protect,requireMembership ,dropController.claimDrop);
+// router.post("/:id/claim", protect,requireMembership ,dropController.claimDrop);
  
 module.exports = router; 

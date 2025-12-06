@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Inventory</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f8;
+      color: #333;
+    }
+    header {
+      background: #1e7d32;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    nav a:hover {
+      color: #c8f0c0;
+    }
+    main {
+      padding: 40px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #1e7d32;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      text-align: left;
+      padding: 14px 16px;
+    }
+    th {
+      background: #1e7d32;
+      color: white;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    tr:hover {
+      background: #eaf8ea;
+    }
+    a.btn {
+      background: #1e7d32;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    a.btn:hover {
+      background: #145d23;
+    }
+    @media (max-width: 768px) {
+      table { font-size: 14px; }
+      header, main { padding: 20px; }
+      nav a { margin-left: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome, <%= user.name %></h1>
+    <nav>
+      <a href="/seller/add" class="btn">Add New Product</a>
+      <a href="/seller/inventory/add" class="btn">Add New Stock</a>
+      <a href="/seller/inventory" class="btn">View Inventory</a>
+      <a href="/seller/auth/logout" class="btn" style="background:#b00020;">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Your Inventory</h2>
+    <% if(inventory.length === 0){ %>
+      <p>No inventory available. Please add some stock.</p>
+    <% } else { %>
+    <table>
+      <tr>
+        <th>Product</th>
+        <th>Total Stock</th>
+        <th>Sold</th>
+        <th>Remaining</th>
+        <th>Action</th>
+      </tr>
+      <% inventory.forEach(item => { %>
+      <tr>
+        <td><%= item.product.title %></td>
+        <td><%= item.totalStock %></td>
+        <td><%= item.sold %></td>
+        <td><%= item.remaining %></td>
+        <td>
+          <a href="/seller/inventory/restock/<%= item._id %>" class="btn">Restock</a>
+        </td>
+      </tr>
+      <% }) %>
+    </table>
+    <% } %>
+  </main>
+</body>
+</html>

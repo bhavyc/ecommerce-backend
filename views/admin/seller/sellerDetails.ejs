@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Details</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h1, h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1rem;
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    p strong {
+      color: #555;
+      width: 140px;
+      display: inline-block;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      margin: 8px 0;
+    }
+
+    ul li a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    ul li a:hover {
+      text-decoration: underline;
+    }
+
+    .actions {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .actions form {
+      display: inline-block;
+      margin: 0 10px;
+    }
+
+    .actions button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+
+    .actions button.approve {
+      background-color: #28a745;
+    }
+
+    .actions button.approve:hover {
+      background-color: #218838;
+    }
+
+    .actions button.reject {
+      background-color: #dc3545;
+    }
+
+    .actions button.reject:hover {
+      background-color: #c82333;
+    }
+
+    @media(max-width:768px){
+      .actions button {
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Seller Details</h1>
+
+    <p><strong>Name:</strong> <%= profile.seller.name %></p>
+    <p><strong>Email:</strong> <%= profile.seller.email %></p>
+    <p><strong>Business Name:</strong> <%= profile.businessName %></p>
+    <p><strong>Business Type:</strong> <%= profile.businessType %></p>
+    <p><strong>PAN:</strong> <%= profile.panNumber %></p>
+    <p><strong>GST:</strong> <%= profile.gstNumber %></p>
+    <p><strong>Bank Account:</strong> <%= profile.bankAccountNo %></p>
+    <p><strong>IFSC:</strong> <%= profile.ifscCode %></p>
+    <p><strong>Address:</strong> <%= profile.address %>, <%= profile.city %>, <%= profile.state %> - <%= profile.pincode %></p>
+
+    <h2>Documents</h2>
+    <ul>
+      <% documents.forEach(doc => { %>
+        <li><strong><%= doc.docType %>:</strong> <a href="/<%= doc.filePath %>" target="_blank">View</a></li>
+      <% }) %>
+    </ul>
+
+    <div class="actions">
+      <form action="/admin/sellers/approve/<%= profile._id %>" method="POST">
+        <button class="approve" type="submit">Approve</button>
+      </form>
+      <form action="/admin/sellers/reject/<%= profile._id %>" method="POST">
+        <button class="reject" type="submit">Reject</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

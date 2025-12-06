@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Expense Analytics</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #f3f7f3;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: #0eb365;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 35px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.18);
+        }
+
+        .chart-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #222;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            max-height: 380px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">Daily Expense Analytics</div>
+
+<div class="container">
+
+    <div class="card">
+        <h3 class="chart-title">Category-wise Expense (Pie Chart)</h3>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3 class="chart-title">Hourly Spending Pattern (Line Chart)</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+const pieLabels = <%- JSON.stringify(pieLabels) %>;
+const pieValues = <%- JSON.stringify(pieValues) %>;
+
+const lineLabels = <%- JSON.stringify(lineLabels) %>;
+const lineValues = <%- JSON.stringify(lineValues) %>;
+
+// PIE CHART
+new Chart(document.getElementById("pieChart"), {
+  type: "pie",
+  data: {
+      labels: pieLabels,
+      datasets: [{
+          data: pieValues,
+          borderWidth: 1
+      }]
+  },
+  options: {
+      plugins: {
+          legend: { position: 'bottom' }
+      }
+  }
+});
+
+// LINE CHART
+new Chart(document.getElementById("lineChart"), {
+  type: "line",
+  data: {
+      labels: lineLabels,
+      datasets: [{
+          data: lineValues,
+          fill: false,
+          tension: 0.3,
+          borderWidth: 2
+      }]
+  },
+  options: {
+      scales: {
+          y: {
+              beginAtZero: true
+          }
+      },
+      plugins: {
+          legend: { display: false }
+      }
+  }
+});
+</script>
+
+</body>
+</html>
