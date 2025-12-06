@@ -40,7 +40,7 @@ const app = express();
 // ------------------ CONNECT DATABASE ------------------
 connectDB();
 app.use(cors({
-  origin: "http://localhost:5173", // Tera Frontend URL
+  origin: "my-shop-dun-nine.vercel.app", 
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true // Agar cookies/headers use kar raha hai toh zaruri hai
 }));
