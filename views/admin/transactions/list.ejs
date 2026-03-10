@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Transactions - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f7; }
+    #sidebar { position: fixed; left: 0; top: 0; width: 220px; height: 100vh; background: #1b5e20; padding-top: 60px; z-index: 1000; }
+    #sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: white; text-decoration: none; margin: 8px 10px; border-radius: 10px; transition: 0.3s; }
+    #sidebar a:hover, #sidebar a.active { background: rgba(255,255,255,0.2); }
+    #main-content { margin-left: 240px; padding: 30px; }
+    
+    .table-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .table thead { background-color: #e8f5e9; color: #1b5e20; }
+    
+    .amt-credit { color: #2e7d32; font-weight: bold; }
+    .amt-debit { color: #d32f2f; font-weight: bold; }
+    
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+    .bg-success-subtle { background: #d1e7dd; color: #0f5132; }
+    .bg-warning-subtle { background: #fff3cd; color: #856404; }
+    .bg-danger-subtle { background: #f8d7da; color: #842029; }
+    .bg-info-subtle { background: #cff4fc; color: #055160; }
+    
+    .filter-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h4 class="text-center text-white mb-4">Admin</h4>
+  <a href="/admin/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+  <a href="/admin/transactions" class="active"><i class="fas fa-exchange-alt"></i> Transactions</a>
+  <a href="/admin/orders"><i class="fas fa-shopping-cart"></i> All Orders</a>
+  <a href="/admin/payouts"><i class="fas fa-money-bill-wave"></i> Payouts</a>
+  <a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</div>
+
+<div id="main-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-success fw-bold">Financial Audit Trail</h2>
+    <button onclick="loadTxns(1)" class="btn btn-success"><i class="fas fa-sync"></i> Refresh</button>
+  </div>
+
+  <!-- Advanced Filters -->
+  <div class="filter-card">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="small fw-bold">Search User / Desc</label>
+        <input id="searchInput" type="text" class="form-control" placeholder="Name or Email..." onkeyup="if(event.key === 'Enter') applyFilters()">
+      </div>
+      <div class="col-md-2">
+        <label class="small fw-bold">Type</label>
+        <select id="typeFilter" class="form-select" onchange="applyFilters()">
+          <option value="">All Types</option>
+          <option value="CREDIT">CREDIT (In)</option>
+          <option value="DEBIT">DEBIT (Out)</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="small fw-bold">Status</label>
+        <select id="statusFilter" class="form-select" onchange="applyFilters()">
+          <option value="">All Status</option>
+          <option value="SUCCESS">Success</option>
+          <option value="ON_HOLD">On Hold</option>
+          <option value="PENDING">Pending</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="small fw-bold">From</label>
+        <input id="fromDate" type="date" class="form-control" onchange="applyFilters()">
+      </div>
+      <div class="col-md-2">
+        <label class="small fw-bold">To</label>
+        <input id="toDate" type="date" class="form-control" onchange="applyFilters()">
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()"><i class="fas fa-eraser"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>User Info</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Gateway</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="txnTableBody"></tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <div id="paginationInfo" class="small text-muted"></div>
+      <nav><ul class="pagination pagination-sm mb-0" id="paginationButtons"></ul></nav>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+
+  document.addEventListener("DOMContentLoaded", () => loadTxns(1));
+
+  function applyFilters() { currentPage = 1; loadTxns(1); }
+  function clearFilters() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("typeFilter").value = "";
+    document.getElementById("statusFilter").value = "";
+    document.getElementById("fromDate").value = "";
+    document.getElementById("toDate").value = "";
+    applyFilters();
+  }
+
+  async function loadTxns(page) {
+    const search = document.getElementById("searchInput").value;
+    const type = document.getElementById("typeFilter").value;
+    const status = document.getElementById("statusFilter").value;
+    const from = document.getElementById("fromDate").value;
+    const to = document.getElementById("toDate").value;
+
+    const tbody = document.getElementById("txnTableBody");
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5"><div class="spinner-border text-success"></div></td></tr>`;
+
+    try {
+      const params = new URLSearchParams({ page, search, type, status, from, to });
+      const res = await fetch(`/admin/transactions/data?${params.toString()}`);
+      const data = await res.json();
+
+      tbody.innerHTML = "";
+      if (data.success && data.transactions.length > 0) {
+        data.transactions.forEach(t => {
+          const date = new Date(t.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+          const amtClass = t.type === 'CREDIT' ? 'amt-credit' : 'amt-debit';
+          const typeIcon = t.type === 'CREDIT' ? 'fa-arrow-down' : 'fa-arrow-up';
+          
+          let statusClass = 'bg-info-subtle';
+          if(t.status === 'SUCCESS') statusClass = 'bg-success-subtle';
+          if(t.status === 'ON_HOLD') statusClass = 'bg-warning-subtle';
+          if(t.status === 'CANCELLED' || t.status === 'FAILED') statusClass = 'bg-danger-subtle';
+
+          tbody.innerHTML += `
+            <tr>
+              <td class="small">${date}</td>
+              <td>
+                <div class="fw-bold">${t.user?.name || 'System'}</div>
+                <div class="small text-muted">${t.user?.email || t.user?.role || ''}</div>
+              </td>
+              <td class="small text-wrap" style="max-width: 200px;">${t.description}</td>
+              <td><i class="fas ${typeIcon} ${amtClass} me-1"></i> ${t.type}</td>
+              <td class="${amtClass}">₹${t.amount}</td>
+              <td><span class="badge bg-light text-dark border">${t.paymentGateway}</span></td>
+              <td><span class="status-badge ${statusClass}">${t.status}</span></td>
+            </tr>`;
+        });
+        renderPagination(data.pagination);
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No transactions found.</td></tr>`;
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  function renderPagination(pg) {
+    const container = document.getElementById("paginationButtons");
+    document.getElementById("paginationInfo").innerText = `Showing Page ${pg.currentPage} of ${pg.totalPages}`;
+    let html = "";
+    html += `<li class="page-item ${pg.currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="loadTxns(${pg.currentPage - 1})">Prev</a></li>`;
+    for(let i=1; i <= pg.totalPages; i++) {
+      if(i === 1 || i === pg.totalPages || (i >= pg.currentPage-1 && i <= pg.currentPage+1)) {
+        html += `<li class="page-item ${i === pg.currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="loadTxns(${i})">${i}</a></li>`;
+      } else if (i === pg.currentPage-2 || i === pg.currentPage+2) {
+        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      }
+    }
+    html += `<li class="page-item ${pg.currentPage === pg.totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="loadTxns(${pg.currentPage + 1})">Next</a></li>`;
+    container.innerHTML = html;
+  }
+</script>
+</body>
+</html>

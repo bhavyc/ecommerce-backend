@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pending Sellers</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+      
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+     
+    .table-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #007BFF;
+      color: #fff;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f1f5f9;
+    }
+
+    tr:hover {
+      background-color: #e2e8f0;
+    }
+
+    .status {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #fff;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .status.under-review {
+      background-color: #ffc107;
+    }
+
+    .status.approved {
+      background-color: #28a745;
+    }
+
+    .status.rejected {
+      background-color: #dc3545;
+    }
+
+    .actions a {
+      margin-right: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .actions a.view {
+      background-color: #6c757d;
+    }
+    .actions a.approve {
+      background-color: #28a745;
+    }
+    .actions a.reject {
+      background-color: #dc3545;
+    }
+
+    .actions a:hover {
+      opacity: 0.85;
+    }
+
+    p.no-sellers {
+      text-align: center;
+      font-size: 1rem;
+      color: #555;
+      margin-top: 40px;
+    }
+
+    @media(max-width:768px){
+      th, td {
+        padding: 10px 8px;
+      }
+
+      .actions a {
+        display: block;
+        margin: 4px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Pending Sellers</h1>
+
+  <div class="table-container">
+    <% if (pendingSellers.length === 0) { %>
+      <p class="no-sellers">No pending sellers found.</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Business Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pendingSellers.forEach(seller => { %>
+            <tr>
+              <td><%= seller.seller ? seller.seller.name : "N/A" %></td>
+              <td><%= seller.seller ? seller.seller.email : "N/A" %></td>
+              <td><%= seller.businessName || "N/A" %></td>
+              <td>
+                <span class="status <%= seller.status.toLowerCase().replace(' ', '-') %>">
+                  <%= seller.status || "N/A" %>
+                </span>
+              </td>
+              <td class="actions">
+                <a class="view" href="/admin/sellers/view/<%= seller._id %>">View</a>
+                <a class="approve" href="/admin/sellers/approve/<%= seller._id %>">Approve</a>
+                <a class="reject" href="/admin/sellers/reject/<%= seller._id %>">Reject</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</body>
+</html>

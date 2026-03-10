@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #d4f7d4, #a3e4a3);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      width: 360px;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      box-shadow: 0px 10px 30px rgba(0,128,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .login-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0px 15px 40px rgba(0,128,0,0.3);
+    }
+
+    .login-card h3 {
+      color: #1b5e20;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .form-control {
+      border-radius: 12px;
+      border: 1px solid #2e7d32;
+      padding: 10px 14px;
+      transition: all 0.3s;
+    }
+    .form-control:focus {
+      border-color: #1b5e20;
+      box-shadow: 0 0 10px rgba(27,94,32,0.3);
+      outline: none;
+    }
+
+    .btn-success {
+      background: #2e7d32;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-success:hover {
+      background: #1b5e20;
+      transform: scale(1.05);
+    }
+
+    .alert-danger {
+      border-radius: 12px;
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+
+    .login-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .login-footer a {
+      color: #1b5e20;
+      font-weight: 500;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h3>Admin Login</h3>
+    <% if(error){ %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/admin/login">
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="mb-3">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Login</button>
+    </form>
+
+    <div class="login-footer">
+      <a href="/admin/register">Register Admin</a>
+    </div>
+  </div>
+
+</body>
+</html>

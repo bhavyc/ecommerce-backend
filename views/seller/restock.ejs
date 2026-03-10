@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Restock Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    main {
+      width: 100%;
+      max-width: 400px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      color: #1e7d32;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    form label {
+      display: block;
+      text-align: left;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    form input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #1e7d32;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #145d23;
+      transform: translateY(-2px);
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #1e7d32;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    a.back-link:hover {
+      color: #145d23;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 20px;
+      }
+
+      form input, button {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Restock: <%= inventory.product.title %></h2>
+    <form action="/seller/inventory/restock/<%= inventory._id %>" method="POST">
+      <label>Quantity to Add:</label>
+      <input type="number" name="quantity" min="1" required />
+      <button type="submit">Update Stock</button>
+    </form>
+    <a href="/seller/inventory" class="back-link">← Back to Inventory</a>
+  </main>
+</body>
+</html>

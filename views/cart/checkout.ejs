@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #e3f2fd, #ffffff);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .checkout-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+      font-weight: bold;
+    }
+    h3 {
+      color: #185a9d;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      border-bottom: 2px solid #e3f2fd;
+      padding-bottom: 5px;
+    }
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    button {
+      background: linear-gradient(90deg, #43cea2, #185a9d);
+      color: #fff;
+      border: none;
+      font-weight: bold;
+      transition: 0.3s;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    a {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #185a9d;
+      font-weight: 500;
+      text-align: center;
+      width: 100%;
+    }
+    
+    /* 🔥 New Styles for Payment Radio Buttons */
+    .payment-option {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .payment-option:hover {
+      background-color: #f8f9fa;
+      border-color: #185a9d;
+    }
+    .payment-option.disabled {
+      background-color: #f1f1f1;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .wallet-bal {
+      font-weight: bold;
+      color: #198754; /* Green */
+    }
+    .low-bal {
+      color: #dc3545; /* Red */
+      font-size: 0.85rem;
+      display: block;
+      margin-left: 25px;
+    }
+    .total {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 25px;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-box">
+    <h1>Checkout</h1>
+
+    <form action="/order/place" method="POST">
+      <!-- Hidden Fields -->
+      <input type="hidden" name="userId" value="<%= user._id %>">
+      <!-- Total amount bhi bhej rahe hain taaki backend verify kar sake -->
+      <input type="hidden" name="totalAmount" value="<%= totalAmount %>"> 
+
+      <!-- 🏠 Address Section -->
+      <h3>Shipping Address</h3>
+      <div class="row">
+        <div class="col-12">
+           <input type="text" name="shippingAddress[fullName]" placeholder="Full Name" required value="<%= user.name %>">
+        </div>
+        <div class="col-12">
+           <input type="text" name="shippingAddress[addressLine1]" placeholder="Address Line 1" required>
+        </div>
+        <div class="col-6">
+           <input type="text" name="shippingAddress[city]" placeholder="City" required>
+        </div>
+        <div class="col-6">
+           <input type="text" name="shippingAddress[state]" placeholder="State" required>
+        </div>
+        <div class="col-6">
+           <input type="text" name="shippingAddress[postalCode]" placeholder="Postal Code" required>
+        </div>
+        <div class="col-6">
+           <input type="text" name="shippingAddress[phone]" placeholder="Phone" required>
+        </div>
+      </div>
+
+      <!-- 💳 Payment Section -->
+      <h3>Payment Method</h3>
+      
+      <% const canAfford = user.walletBalance >= totalAmount; %>
+
+      <!-- Option 1: Wallet -->
+      <div class="payment-option <%= canAfford ? '' : 'disabled' %>">
+        <div class="form-check">
+          <% if(canAfford) { %>
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payWallet" value="WALLET" checked>
+          <% } else { %>
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payWallet" value="WALLET" disabled>
+          <% } %>
+          
+          <label class="form-check-label w-100" for="payWallet">
+            <strong>⚡ Pay via Wallet</strong> 
+            <span class="wallet-bal">(Bal: ₹<%= user.walletBalance %>)</span>
+          </label>
+          
+          <!-- Low Balance Warning -->
+          <% if(!canAfford) { %>
+            <span class="low-bal">
+              ❌ Low Balance. Need ₹<%= totalAmount - user.walletBalance %> more.
+              <a href="/wallet" target="_blank" style="display:inline; width:auto; text-decoration:underline;">Add Money</a>
+            </span>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Option 2: COD -->
+      <div class="payment-option">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="paymentMethod" id="payCOD" value="COD" <%= !canAfford ? 'checked' : '' %>>
+          <label class="form-check-label fw-bold" for="payCOD">
+            💵 Cash on Delivery
+          </label>
+        </div>
+      </div>
+
+      <!-- Option 3: UPI -->
+      <div class="payment-option">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="paymentMethod" id="payUPI" value="UPI">
+          <label class="form-check-label fw-bold" for="payUPI">
+            📱 UPI / Online
+          </label>
+        </div>
+      </div>
+
+      <h3 class="total">Total Amount: ₹<%= totalAmount %></h3>
+      <button type="submit">Place Order</button>
+    </form>
+
+    <a href="/cart/<%= user._id %>">← Back to Cart</a>
+  </div>
+</body>
+</html>

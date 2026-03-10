@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Payouts - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f7; overflow-x: hidden; }
+
+    /* Sidebar Style */
+    #sidebar { 
+      position: fixed; left: 0; top: 0; width: 220px; height: 100vh; 
+      background: #1b5e20; padding-top: 60px; z-index: 1000; 
+    }
+    #sidebar a { 
+      display: flex; align-items: center; gap: 12px; padding: 12px 20px; 
+      color: white; text-decoration: none; margin: 8px 10px; border-radius: 10px; 
+      transition: 0.3s; 
+    }
+    #sidebar a:hover, #sidebar a.active { background: rgba(255,255,255,0.2); }
+    #main-content { margin-left: 240px; padding: 30px; }
+
+    /* Cards & Tables */
+    .table-card { 
+      background: white; border-radius: 15px; padding: 25px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+    }
+    .table thead { background-color: #e8f5e9; color: #1b5e20; border-bottom: 2px solid #2e7d32; }
+    
+    /* Badges */
+    .badge-pending { background-color: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .badge-approved { background-color: #d1e7dd; color: #0f5132; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .badge-rejected { background-color: #f8d7da; color: #842029; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+
+    /* Wallet Info Box */
+    .wallet-stats-box { 
+      font-size: 12px; padding: 10px; border-radius: 10px; 
+      background: #f8f9fa; border: 1px solid #dee2e6; min-width: 160px; 
+    }
+    .stats-label { color: #6c757d; font-weight: 600; }
+
+    .btn-action { width: 90px; font-size: 12px; font-weight: bold; margin-bottom: 4px; border-radius: 6px; }
+
+    /* Filter UI */
+    .filter-card { 
+      background: white; border-radius: 15px; padding: 20px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; 
+    }
+    .filter-label { font-size: 12px; color: #2e7d32; font-weight: 700; margin-bottom: 6px; display: inline-block; }
+    
+    /* Pagination Style */
+    .pagination-wrapper {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 20px;
+    }
+    .page-link { color: #1b5e20; border: 1px solid #dee2e6; }
+    .page-item.active .page-link { background-color: #1b5e20; border-color: #1b5e20; color: white; }
+    .page-link:hover { background-color: #e8f5e9; color: #1b5e20; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h4 class="text-center text-white mb-4">Admin Panel</h4>
+  <a href="/admin/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+  <a href="/admin/payouts" class="active"><i class="fas fa-money-bill-wave"></i> Payout Requests</a>
+  <a href="/admin/sellers"><i class="fas fa-store"></i> Sellers</a>
+  <a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</div>
+
+<div id="main-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="text-success fw-bold mb-0">Seller Payout Requests</h2>
+      <p class="text-muted small">Verify bank details and manage withdrawals with full history.</p>
+    </div>
+    <button onclick="loadRequests(1)" class="btn btn-success shadow-sm">
+      <i class="fas fa-sync-alt"></i> Refresh Data
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-card">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <span class="filter-label">Quick Search</span>
+        <div class="input-group">
+          <span class="input-group-text bg-white border border-end-0"><i class="fas fa-search text-muted"></i></span>
+          <input id="searchInput" type="text" class="form-control border-start-0" placeholder="Name, Email or Phone..." onkeyup="if(event.key === 'Enter') applyFilters()">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <span class="filter-label">From Date</span>
+        <input id="fromDate" type="date" class="form-control"/>
+      </div>
+      <div class="col-md-2">
+        <span class="filter-label">To Date</span>
+        <input id="toDate" type="date" class="form-control"/>
+      </div>
+      <div class="col-md-4 d-flex align-items-end gap-2">
+        <button class="btn btn-success flex-grow-1 fw-bold" onclick="applyFilters()">
+          <i class="fas fa-filter me-1"></i> Filter
+        </button>
+        <button class="btn btn-outline-secondary flex-grow-1 fw-bold" onclick="clearFilters()">
+          <i class="fas fa-eraser me-1"></i> Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payouts Table -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Seller Info</th>
+            <th>Payout Amount</th>
+            <th>Wallet Status</th>
+            <th>Bank Details</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="payoutTableBody">
+          <tr><td colspan="7" class="text-center py-5">Loading withdrawal requests...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ✅ Pagination UI -->
+    <div class="pagination-wrapper">
+      <div id="paginationInfo" class="small text-muted">Showing 0 of 0 requests</div>
+      <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm mb-0" id="paginationButtons">
+          <!-- Buttons will be injected here -->
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+
+  document.addEventListener("DOMContentLoaded", () => loadRequests(1));
+
+  function applyFilters() {
+    currentPage = 1; // Reset to page 1 on new search
+    loadRequests(1);
+  }
+
+  function clearFilters() {
+    document.getElementById("fromDate").value = "";
+    document.getElementById("toDate").value = "";
+    document.getElementById("searchInput").value = "";
+    currentPage = 1;
+    loadRequests(1);
+  }
+
+  function buildQueryParams(page) {
+    const from = document.getElementById("fromDate").value;
+    const to = document.getElementById("toDate").value;
+    const search = document.getElementById("searchInput").value;
+    
+    const params = new URLSearchParams();
+    params.set("page", page);
+    params.set("limit", 10);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    if (search) params.set("search", search);
+    
+    return params.toString();
+  }
+
+  async function loadRequests(page) {
+    try {
+      const tbody = document.getElementById("payoutTableBody");
+      const query = buildQueryParams(page);
+      const url = `/admin/payouts/requests?${query}`;
+
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5">Loading...</td></tr>`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      tbody.innerHTML = "";
+
+      if (data.success && data.requests.length > 0) {
+        data.requests.forEach(req => {
+          let statusBadge = '';
+          let actionCell = '';
+
+          if (req.status === 'PENDING') {
+            statusBadge = `<span class="badge-pending">PENDING</span>`;
+            actionCell = `
+              <button onclick="handleProcess('${req._id}', 'APPROVE')" class="btn btn-success btn-action">Approve</button>
+              <button onclick="handleProcess('${req._id}', 'REJECT')" class="btn btn-danger btn-action">Reject</button>
+            `;
+          } else if (req.status === 'APPROVED') {
+            statusBadge = `<span class="badge-approved"><i class="fas fa-check-circle"></i> PAID</span>`;
+            actionCell = `<small class="text-success fw-bold">Processed</small>`;
+          } else {
+            statusBadge = `<span class="badge-rejected"><i class="fas fa-times-circle"></i> REJECTED</span>`;
+            actionCell = `<small class="text-muted">Refunded</small>`;
+          }
+
+          tbody.innerHTML += `
+            <tr id="row-${req._id}">
+              <td class="small text-muted">${new Date(req.createdAt).toLocaleDateString('en-IN')}</td>
+              <td>
+                <div class="fw-bold text-dark">${req.seller?.name || 'N/A'}</div>
+                <div class="text-muted small">${req.seller?.email || ''}</div>
+              </td>
+              <td><span class="fs-5 fw-bold text-success">₹${req.amount}</span></td>
+              <td>
+                <div class="wallet-stats-box shadow-sm">
+                  <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                    <span class="stats-label">Left:</span>
+                    <span class="fw-bold text-dark">₹${req.seller?.walletBalance || 0}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="stats-label">Hold:</span>
+                    <span class="fw-bold text-primary">₹${req.seller?.pendingBalance || 0}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="small">
+                <div><i class="fas fa-university text-muted me-1"></i> ${req.bankDetails?.accountNumber || '-'}</div>
+                <div class="text-muted fw-bold">IFSC: ${req.bankDetails?.ifsc || '-'}</div>
+              </td>
+              <td>${statusBadge}</td>
+              <td>${actionCell}</td>
+            </tr>
+          `;
+        });
+        
+        // Update Pagination UI
+        currentPage = page;
+        renderPagination(data.pagination);
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No requests found.</td></tr>`;
+        document.getElementById("paginationButtons").innerHTML = "";
+        document.getElementById("paginationInfo").innerText = "Showing 0 requests";
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById("payoutTableBody").innerHTML = `<tr><td colspan="7" class="text-center text-danger py-5">Error connecting to server.</td></tr>`;
+    }
+  }
+
+  function renderPagination(pg) {
+    const info = document.getElementById("paginationInfo");
+    const container = document.getElementById("paginationButtons");
+    
+    info.innerText = `Showing Page ${pg.currentPage} of ${pg.totalPages} (${pg.totalCount} total requests)`;
+    
+    let html = "";
+    
+    // Prev Button
+    html += `<li class="page-item ${pg.currentPage === 1 ? 'disabled' : ''}">
+              <a class="page-link" href="#" onclick="loadRequests(${pg.currentPage - 1}); return false;">Prev</a>
+            </li>`;
+
+    // Logic to show limited numbers
+    for (let i = 1; i <= pg.totalPages; i++) {
+      if (i === 1 || i === pg.totalPages || (i >= pg.currentPage - 1 && i <= pg.currentPage + 1)) {
+        html += `<li class="page-item ${pg.currentPage === i ? 'active' : ''}">
+                  <a class="page-link" href="#" onclick="loadRequests(${i}); return false;">${i}</a>
+                </li>`;
+      } else if (i === pg.currentPage - 2 || i === pg.currentPage + 2) {
+        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      }
+    }
+
+    // Next Button
+    html += `<li class="page-item ${pg.currentPage === pg.totalPages ? 'disabled' : ''}">
+              <a class="page-link" href="#" onclick="loadRequests(${pg.currentPage + 1}); return false;">Next</a>
+            </li>`;
+            
+    container.innerHTML = html;
+  }
+
+  async function handleProcess(payoutId, action) {
+    let adminNote = "", transactionId = "";
+    if (action === 'APPROVE') {
+      transactionId = prompt("STEP 1: Transfer via Bank.\nSTEP 2: Enter Bank UTR / Transaction ID:");
+      if (!transactionId) return alert("UTR Number is required!");
+      adminNote = "Manual Bank Transfer";
+    } else {
+      adminNote = prompt("Reason for rejection:");
+      if (!adminNote) return alert("Reason is required.");
+    }
+
+    if (!confirm(`Are you sure you want to ${action}?`)) return;
+
+    try {
+      const res = await fetch("/admin/payouts/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payoutId, action, adminNote, transactionId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        loadRequests(currentPage);
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) { alert("Server Error."); }
+  }
+</script>
+
+</body>
+</html>

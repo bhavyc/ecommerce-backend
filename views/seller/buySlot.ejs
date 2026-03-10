@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book a Slot</title>
+    <!-- Razorpay Script Zaroori Hai -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; }
+        .btn { background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .error { color: red; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2> Boost Your Sales via Slots</h2>
+    
+    <!-- Status Show Karo -->
+    <p>Daily Limits: Drops (<%= used.drop %>/<%= limits.drop %>) | Deals (<%= used.deal %>/<%= limits.deal %>)</p>
+    <% if(isCooldownActive) { %>
+        <p style="color:red;"> Cooldown Active! Wait <%= daysLeft %> days.</p>
+    <% } %>
+
+    <div id="bookingForm">
+        <!-- 1. Product Select -->
+        <div class="form-group">
+            <label>Select Product</label>
+            <select id="productId">
+                <% products.forEach(p => { %>
+                    <option value="<%= p._id %>"><%= p.title %> (<%= p.price %>)</option>
+                <% }) %>
+            </select>
+        </div>
+
+        <!-- 2. Slot Type Select -->
+        <div class="form-group">
+            <label>Slot Type</label>
+            <select id="slotType" onchange="updatePrice()">
+                <option value="DROP">15 Min Drop (High Traffic) -   500</option>
+                <option value="DEAL">24 Hr Deal (Long Term) - 200</option>
+            </select>
+        </div>
+
+        <!-- 3. DISCOUNT INPUT (Yahan Seller Discount Dega) -->
+        <div class="form-group">
+            <label>Discount Percentage (%)</label>
+            <input type="number" id="discount" placeholder="e.g. 40" min="1" max="99">
+            <small id="discountHint" style="color: #666;">Min 40% required for Drops</small>
+        </div>
+
+        <h3 id="priceDisplay">Payable: 500</h3>
+
+        <button class="btn" onclick="initiateBooking()" <%= isCooldownActive ? 'disabled' : '' %>>
+            Pay & Book Slot
+        </button>
+        <p id="msg" class="error"></p>
+    </div>
+</div>
+
+<script>
+    // UI Update Logic
+    function updatePrice() {
+        const type = document.getElementById("slotType").value;
+        const price = type === "DROP" ? 500 : 200;
+        const hint = type === "DROP" ? "Min 40% required for Drops" : "Min 10% required for Deals";
+        
+        document.getElementById("priceDisplay").innerText = `Payable: ${price}`;
+        document.getElementById("discountHint").innerText = hint;
+    }
+
+    // MAIN PAYMENT FUNCTION
+    async function initiateBooking() {
+        const productId = document.getElementById("productId").value;
+        const type = document.getElementById("slotType").value;
+        const discount = document.getElementById("discount").value;
+        const msg = document.getElementById("msg");
+
+        msg.innerText = "";
+
+        // Frontend Validation
+        if (!discount) return msg.innerText = "Please enter discount";
+        if (type === "DROP" && discount < 40) return msg.innerText = "Minimum 40% discount needed for Drops!";
+        if (type === "DEAL" && discount < 10) return msg.innerText = "Minimum 10% discount needed for Deals!";
+
+        try {
+            // Step 1: Backend se Order ID maango
+            const res = await fetch("/seller/buy-slot/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productId, type, discount })
+            });
+
+            const data = await res.json();
+
+            if (!data.success) {
+                return msg.innerText = data.msg || "Error creating order";
+            }
+
+            // Step 2: Razorpay Popup Open karo
+            const options = {
+                "key": "<%= razorpayKey %>", // Controller se aayega
+                "amount": data.order.amount,
+                "currency": "INR",
+                "name": "Your App Name",
+                "description": `Slot Booking for ${type}`,
+                "order_id": data.order.id, // Backend se mila order ID
+                "handler": async function (response) {
+                    // Step 3: Payment Success hone par Backend ko batao
+                    await verifyPayment(response, data.bookingId, discount);
+                },
+                "theme": { "color": "#3399cc" }
+            };
+
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+
+        } catch (err) {
+            console.error(err);
+            msg.innerText = "Something went wrong";
+        }
+    }
+
+    async function verifyPayment(paymentData, bookingId, discount) {
+        try {
+            const res = await fetch("/seller/buy-slot/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    razorpay_order_id: paymentData.razorpay_order_id,
+                    razorpay_payment_id: paymentData.razorpay_payment_id,
+                    razorpay_signature: paymentData.razorpay_signature,
+                    bookingId: bookingId,
+                    discount: discount 
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert("âœ… Success! Your slot is booked. It will appear automatically.");
+                window.location.reload();
+            } else {
+                alert("â Œ Verification Failed: " + data.msg);
+            }
+        } catch (err) {
+            alert("Server Error during verification");
+        }
+    }
+</script>
+
+</body>
+</html>

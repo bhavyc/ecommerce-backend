@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Dashboard | Overview</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --secondary: #f59e0b;
+      --bg-body: #f3f4f6;
+      --bg-card: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #ef4444;
+      --border: #e5e7eb;
+      --sidebar-width: 260px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --transition: all 0.3s ease;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; margin: 0; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #1f2937;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active { display: block; opacity: 1; }
+
+    .brand {
+      padding: 24px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-links { padding: 20px 10px; flex: 1; overflow-y: auto; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      color: #d1d5db;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item i { font-size: 20px; margin-right: 12px; }
+
+    .cta-container {
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      background: #1f2937;
+    }
+
+    .buy-slot-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--secondary);
+      color: #000;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+      transition: transform 0.2s;
+    }
+    .buy-slot-btn:hover { transform: translateY(-2px); background: #fbbf24; }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      color: #f87171;
+      padding: 10px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .logout-btn:hover { color: #fff; }
+
+    /* ================= MAIN CONTENT ================= */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 30px;
+      width: calc(100% - var(--sidebar-width));
+      transition: margin-left 0.3s ease;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .mobile-menu-toggle { display: none; font-size: 28px; cursor: pointer; color: var(--text-main); }
+
+    .user-welcome h2 { font-size: 24px; color: var(--text-main); }
+    .user-welcome span { color: var(--text-muted); font-size: 14px; }
+
+    .action-btn {
+      background: var(--primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .action-btn:hover { background: var(--primary-dark); }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-info h4 { color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+    .stat-info p { font-size: 26px; font-weight: 700; color: var(--text-main); }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .bg-green { background: var(--primary-light); color: var(--primary); }
+    .bg-blue { background: #dbeafe; color: #2563eb; }
+    .bg-purple { background: #f3e8ff; color: #9333ea; }
+    .bg-orange { background: #ffedd5; color: #ea580c; }
+
+    .deals-overview { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+    .deal-pill {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .deal-pill b { color: var(--primary-dark); }
+
+    .charts-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+    }
+    .chart-container-inner { position: relative; height: 250px; width: 100%; }
+    .chart-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .chart-header h3 { font-size: 18px; }
+
+    /* ================= TABLE & SCROLLBAR FIX ================= */
+    .table-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      width: 100%;
+      overflow: hidden; /* Ensures border-radius holds */
+    }
+    
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Modern Slim Scrollbar Logic */
+    .table-responsive { 
+      width: 100%; 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .table-responsive::-webkit-scrollbar { height: 6px; }
+    .table-responsive::-webkit-scrollbar-track { background: transparent; }
+    .table-responsive::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      min-width: 600px; /* Forces scroll only on mobile */
+      white-space: nowrap; /* Prevents wrapping causing height issues */
+    }
+    
+    th {
+      text-align: left;
+      padding: 16px 24px;
+      background: #f9fafb;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .product-info { display: flex; align-items: center; gap: 12px; }
+    .product-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+    .product-name { font-weight: 600; color: var(--text-main); }
+    
+    .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-warning { background: #fff7ed; color: #c2410c; }
+    
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; background: var(--text-main); color: #fff; font-weight: 500; }
+
+    /* Alert */
+    .alert-box {
+      background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 20px; margin-bottom: 30px;
+    }
+    .alert-header { display: flex; align-items: center; gap: 10px; color: var(--danger); margin-bottom: 10px; }
+    .low-item-list { display: flex; flex-wrap: wrap; gap: 10px; }
+    .low-item-chip { background: #fff; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 20px; font-size: 13px; color: #b91c1c; }
+
+    /* ================= MEDIA QUERIES ================= */
+    @media (max-width: 1024px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
+      .main-content { margin-left: 0; width: 100%; padding: 20px; }
+      .mobile-menu-toggle { display: block; }
+    }
+
+    @media (max-width: 768px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .header-left { width: 100%; justify-content: flex-start; }
+      .header-actions { width: 100%; margin-top: 10px; }
+      .action-btn { width: 100%; justify-content: center; }
+      .charts-wrapper { grid-template-columns: 1fr; }
+      .chart-container-inner { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <i class='bx bxs-shopping-bag-alt'></i> SellerPanel
+    </div>
+    
+    <nav class="nav-links">
+      <a href="/seller/dashboard" class="nav-item active">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <!-- dashboard.ejs mein kahin bhi add kar do -->
+<a href="/seller/daily-orders" class="nav-item">  <i class='bx bxs-box'></i>Check Today's Orders</a>
+      <a href="/seller/inventory" class="nav-item">
+        <i class='bx bxs-box'></i> Inventory
+      </a>
+      <a href="/seller/add" class="nav-item">
+        <i class='bx bx-plus-circle'></i> Add Product
+      </a>
+      <a href="/sellers/products/bulk-upload" class="nav-item">
+        <i class='bx bx-upload'></i> Bulk Upload
+      </a>
+      <a href="/seller/wallet" class="nav-item">
+        <i class='bx bxs-wallet'></i> Wallet
+      </a>
+
+      <a href="/seller/slots/history" class="nav-item">
+    <i class='bx bxs-time-five'></i> Slot History
+</a>
+    </nav>
+
+    <div class="cta-container">
+      <a href="/seller/buy-slot" class="buy-slot-btn">
+        <i class='bx bxs-rocket'></i> Buy Slot
+      </a>
+      <a href="/seller/auth/logout" class="logout-btn">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header>
+      <div class="header-left">
+        <i class='bx bx-menu mobile-menu-toggle' onclick="toggleSidebar()"></i>
+        <div class="user-welcome">
+          <h2>Hello, <%= typeof user !== 'undefined' && user.name ? user.name : 'Seller' %> </h2>
+          <span>Here is what's happening today.</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="/seller/inventory/add" class="action-btn primary">
+          <i class='bx bx-plus'></i> Add Stock
+        </a>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Total Revenue</h4>
+          <p>₹<%= typeof revenue !== 'undefined' ? revenue : 0 %></p>
+        </div>
+        <div class="stat-icon bg-green"><i class='bx bx-rupee'></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Total Orders</h4>
+          <p><%= typeof totalOrders !== 'undefined' ? totalOrders : 0 %></p>
+        </div>
+        <div class="stat-icon bg-blue"><i class='bx bx-shopping-bag'></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Products</h4>
+          <p><%= typeof totalProducts !== 'undefined' ? totalProducts : 0 %></p>
+        </div>
+        <div class="stat-icon bg-purple"><i class='bx bx-tag'></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Total Stock</h4>
+          <p><%= typeof stockCount !== 'undefined' ? stockCount : 0 %></p>
+        </div>
+        <div class="stat-icon bg-orange"><i class='bx bx-layer'></i></div>
+      </div>
+    </div>
+
+    <!-- Deals -->
+    <div class="deals-overview">
+      <div class="deal-pill"><i class='bx bx-check-circle'></i> Normal: <b><%= typeof normalDeals !== 'undefined' ? normalDeals : 0 %></b></div>
+      <div class="deal-pill"><i class='bx bxs-time'></i> 24Hr Deals: <b><%= typeof timedDeals !== 'undefined' ? timedDeals : 0 %></b></div>
+      <div class="deal-pill"><i class='bx bxs-hot'></i> Drops: <b><%= typeof dropDeals !== 'undefined' ? dropDeals : 0 %></b></div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <% if (typeof lowStock !== 'undefined' && lowStock && lowStock.length) { %>
+      <div class="alert-box">
+        <div class="alert-header">
+          <i class='bx bxs-error-circle'></i>
+          <h3>Low Stock Alert</h3>
+        </div>
+        <div class="low-item-list">
+          <% lowStock.forEach(i => { %>
+            <div class="low-item-chip">
+              <%= i.product ? i.product.title : 'Item' %>: <b><%= i.remaining %> left</b>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Charts -->
+    <div class="charts-wrapper">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Revenue</h3>
+          <i class='bx bx-line-chart' style="color:var(--primary); font-size:20px;"></i>
+        </div>
+        <div class="chart-container-inner">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Top Products</h3>
+          <i class='bx bx-bar-chart-alt-2' style="color:var(--primary); font-size:20px;"></i>
+        </div>
+        <div class="chart-container-inner">
+          <canvas id="topProductsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Table (UPDATED FIX) -->
+    <div class="table-section">
+      <div class="table-header">
+        <h3>Inventory Status</h3>
+        <a href="/seller/inventory" style="font-size:13px; color:var(--primary); font-weight:600;">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Details</th>
+              <th>Sold</th>
+              <th>Remaining</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (typeof inventory !== 'undefined' && inventory && inventory.length) { %>
+              <% inventory.forEach(item => { %>
+                <tr>
+                  <td>
+                    <div class="product-info">
+                      <% if (item.product && item.product.image) { %>
+                        <img src="<%= item.product.image %>" class="product-thumb" alt="Img">
+                      <% } else { %>
+                        <div class="product-thumb" style="background:#eee; display:flex; align-items:center; justify-content:center;"><i class='bx bx-image'></i></div>
+                      <% } %>
+                      <span class="product-name"><%= item.product ? item.product.title : 'Unknown' %></span>
+                    </div>
+                  </td>
+                  <td><%= item.sold %></td>
+                  <td><%= item.remaining %></td>
+                  <td>
+                    <% if(item.remaining < 5) { %>
+                      <span class="status-badge badge-warning">Low Stock</span>
+                    <% } else { %>
+                      <span class="status-badge badge-success">In Stock</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <a href="/seller/inventory/restock/<%= item._id %>" class="btn-sm">Restock</a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                  No inventory found.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Data & Scripts -->
+  <script id="chart-data" type="application/json">
+    {
+      "months": <%- JSON.stringify(typeof months !== 'undefined' ? months : []) %>,
+      "salesData": <%- JSON.stringify(typeof salesData !== 'undefined' ? salesData : []) %>,
+      "topProductNames": <%- JSON.stringify(typeof topProductNames !== 'undefined' ? topProductNames : []) %>,
+      "topProductSales": <%- JSON.stringify(typeof topProductSales !== 'undefined' ? topProductSales : []) %>
+    }
+  </script>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    try {
+        const rawData = document.getElementById('chart-data').textContent;
+        const chartData = JSON.parse(rawData);
+
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#6b7280';
+        Chart.defaults.maintainAspectRatio = false;
+
+        const ctx1 = document.getElementById('salesChart');
+        if(ctx1) {
+            new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: chartData.months,
+                datasets: [{
+                label: 'Revenue',
+                data: chartData.salesData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 2,
+                pointRadius: 4,
+                tension: 0.4,
+                fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+                }
+            }
+            });
+        }
+
+        const ctx2 = document.getElementById('topProductsChart');
+        if(ctx2) {
+            new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: chartData.topProductNames,
+                datasets: [{
+                label: 'Units',
+                data: chartData.topProductSales,
+                backgroundColor: '#34d399',
+                borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+                }
+            }
+            });
+        }
+    } catch(e) { console.error("Chart error:", e); }
+  </script>
+</body>
+</html>
+

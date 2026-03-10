@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+</head>
+<body>
+  <h1>Checkout</h1>
+
+  <form action="/order/place" method="POST">
+    <input type="hidden" name="userId" value="<%= user._id %>">
+
+    <h3>Shipping Details</h3>
+    <input type="text" name="shippingAddress[fullName]" placeholder="Full Name" required><br>
+    <input type="text" name="shippingAddress[addressLine1]" placeholder="Address Line 1" required><br>
+    <input type="text" name="shippingAddress[addressLine2]" placeholder="Address Line 2"><br>
+    <input type="text" name="shippingAddress[city]" placeholder="City" required><br>
+    <input type="text" name="shippingAddress[state]" placeholder="State" required><br>
+    <input type="text" name="shippingAddress[postalCode]" placeholder="Postal Code" required><br>
+    <input type="text" name="shippingAddress[country]" placeholder="Country" required><br>
+    <input type="text" name="shippingAddress[phone]" placeholder="Phone" required><br>
+
+    <h3>Payment Method</h3>
+    <select name="paymentMethod">
+      <option value="COD">Cash on Delivery</option>
+      <option value="CARD">Card</option>
+      <option value="UPI">UPI</option>
+    </select>
+
+    <h3>Total Amount: ₹<%= totalAmount %></h3>
+
+    <button type="submit">Place Order</button>
+  </form>
+
+  <a href="/cart/<%= user._id %>">← Back to Cart</a>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Details Verification</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h1, h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1rem;
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    p strong {
+      color: #555;
+      width: 160px; /* Thoda bada kiya taaki alignment sahi rahe */
+      display: inline-block;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      margin: 8px 0;
+      padding: 10px;
+      background: #f1f3f5;
+      border-radius: 6px;
+    }
+
+    ul li a {
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: bold;
+      float: right;
+    }
+
+    ul li a:hover {
+      text-decoration: underline;
+    }
+
+    /* --- NEW STYLES FOR DIGILOCKER BOX --- */
+    .status-box {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 5px solid transparent;
+    }
+
+    /* Verified (Green) */
+    .status-verified {
+      background-color: #d4edda;
+      color: #155724;
+      border-left-color: #28a745;
+    }
+
+    /* Manual (Orange) */
+    .status-manual {
+      background-color: #fff3cd;
+      color: #856404;
+      border-left-color: #ffc107;
+    }
+
+    .status-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    /* ------------------------------------- */
+
+    .actions {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .actions form {
+      display: inline-block;
+      margin: 0 10px;
+    }
+
+    .actions button {
+      padding: 12px 30px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+
+    .actions button.approve {
+      background-color: #28a745;
+      box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+    }
+
+    .actions button.approve:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
+    }
+
+    .actions button.reject {
+      background-color: #dc3545;
+      box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+    }
+
+    .actions button.reject:hover {
+      background-color: #c82333;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Seller Verification Request</h1>
+
+    <!-- DIGILOCKER VERIFICATION STATUS BLOCK -->
+    <% if (profile.digiLockerData && profile.digiLockerData.isAadhaarVerified) { %>
+      
+      <!-- CASE 1: VERIFIED VIA DIGILOCKER -->
+      <div class="status-box status-verified">
+        <div class="status-header">
+          <span> Identity Verified via DigiLocker</span>
+        </div>
+        <p><strong>Aadhaar Name:</strong> <%= profile.digiLockerData.aadhaarName %></p>
+        <p><strong>DigiLocker ID:</strong> <%= profile.digiLockerData.digiLockerId %></p>
+        <p><strong>Verified At:</strong> <%= new Date(profile.digiLockerData.verifiedAt).toLocaleString() %></p>
+        <hr style="border-color: #c3e6cb;">
+        <small>System Note: Identity is confirmed by Govt API. Please verify Business Proof manually.</small>
+      </div>
+
+    <% } else { %>
+      
+      <!-- CASE 2: MANUAL CHECK REQUIRED -->
+      <div class="status-box status-manual">
+        <div class="status-header">
+          <span>⚠️ Manual Verification Required</span>
+        </div>
+        <p>This seller did NOT use DigiLocker verification.</p>
+        <p>Please check the uploaded documents carefully (Name Match, Photo Match, etc).</p>
+      </div>
+
+    <% } %>
+
+    <h2>Basic Details</h2>
+    <p><strong>Seller Name:</strong> <%= profile.seller.name %></p>
+    <p><strong>Email:</strong> <%= profile.seller.email %></p>
+    <p><strong>Phone:</strong> <%= profile.seller.phone || 'N/A' %></p>
+    
+    <h2>Business Details</h2>
+    <p><strong>Business Name:</strong> <%= profile.businessName %></p>
+    <p><strong>Business Type:</strong> <%= profile.businessType %></p>
+    <p><strong>PAN Number:</strong> <%= profile.panNumber %></p>
+    <p><strong>GST Number:</strong> <%= profile.gstNumber %></p>
+    
+    <h2>Bank Details</h2>
+    <p><strong>Account No:</strong> <%= profile.bankAccountNo %></p>
+    <p><strong>IFSC Code:</strong> <%= profile.ifscCode %></p>
+
+    <h2>Address</h2>
+    <p>
+      <%= profile.address %>, <%= profile.city %><br>
+      <%= profile.state %> - <%= profile.pincode %>
+    </p>
+
+    <h2>Uploaded Documents</h2>
+<ul>
+  <% if (documents && documents.length > 0) { %>
+    <% documents.forEach(function(doc) { %>
+      <li>
+        <strong><%= doc.docType %>:</strong> 
+        
+        <% if (doc.filePath) { %>
+            <!-- Agar Cloudinary URL hai toh direct dikhao, agar local path hai toh / check karo -->
+            <a href="<%= doc.filePath.startsWith('http') ? doc.filePath : (doc.filePath.startsWith('/') ? doc.filePath : '/' + doc.filePath) %>" 
+               target="_blank" 
+               style="background: #007bff; color: white; padding: 5px 10px; border-radius: 4px; float: right; font-size: 0.8rem;">
+               View Document ↗
+            </a>
+        <% } else { %>
+            <span style="color: #dc3545; font-size: 0.8rem; float: right;"> (File Path Missing in DB)</span>
+        <% } %>
+        <div style="clear: both;"></div>
+      </li>
+    <% }); %>
+  <% } else { %>
+    <li style="color: #dc3545; text-align: center; font-weight: bold;">⚠️ No documents found in database for this seller!</li>
+  <% } %>
+</ul>
+    <div class="actions">
+      <form action="/admin/sellers/approve/<%= profile._id %>" method="POST" onsubmit="return confirm('Are you sure you want to APPROVE this seller?');">
+        <button class="approve" type="submit">Approve Seller</button>
+      </form>
+      
+      <form action="/admin/sellers/reject/<%= profile._id %>" method="POST" onsubmit="return confirm('WARNING: This will DELETE the seller account permanently. Proceed?');">
+        <button class="reject" type="submit">Reject & Delete</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

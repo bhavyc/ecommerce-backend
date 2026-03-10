@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #d4f7d4, #a3e4a3);
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed; left: 0; top: 0; width: 220px; height: 100vh;
+      background: rgba(46, 125, 50, 0.95); backdrop-filter: blur(8px);
+      padding-top: 60px; transition: 0.3s; z-index: 1000;
+    }
+    #sidebar h4 { color: white; text-align: center; margin-bottom: 30px; font-weight: 700; letter-spacing: 1px; }
+    #sidebar a {
+      display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+      color: white; font-weight: 500; text-decoration: none; border-radius: 10px;
+      margin: 8px 10px; transition: all 0.3s; position: relative;
+    }
+    #sidebar a::before {
+      content: ''; position: absolute; left: 0; height: 100%; width: 5px;
+      background: #a5d6a7; border-radius: 5px 0 0 5px; transform: scaleY(0);
+      transform-origin: top; transition: transform 0.3s;
+    }
+    #sidebar a:hover::before { transform: scaleY(1); }
+    #sidebar a:hover { transform: translateX(8px); background: rgba(27, 94, 32, 0.85); }
+
+    /* Main content */
+    #main-content { margin-left: 240px; padding: 30px; transition: 0.3s; }
+    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .top-nav h1 { color: #1b5e20; font-size: 28px; font-weight: 700; text-shadow: 1px 1px 4px rgba(0,0,0,0.1); }
+    .top-nav span {
+      font-weight: 600; color: #2e7d32; background: rgba(255,255,255,0.6);
+      padding: 6px 14px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.8); backdrop-filter: blur(6px);
+      border-radius: 18px; padding: 30px; box-shadow: 0px 8px 25px rgba(0,128,0,0.15);
+      transition: transform 0.4s, box-shadow 0.4s; text-align: center;
+    }
+    .card:hover { transform: translateY(-12px); box-shadow: 0px 15px 35px rgba(0,128,0,0.25); }
+    .card h3 { color: #1b5e20; margin-bottom: 15px; }
+    .card p { font-size: 14px; color: #2e7d32; margin-bottom: 20px; }
+    .btn-primary { background: #2e7d32; border: none; transition: all 0.3s; }
+    .btn-primary:hover { background: #1b5e20; transform: scale(1.05); }
+    
+    /* Special Highlights */
+    .btn-master { background: #ff9800; border: none; }
+    .btn-master:hover { background: #f57c00; }
+    
+    .btn-orders { background: #0288d1; border: none; }
+    .btn-orders:hover { background: #0277bd; }
+
+    .btn-txns { background: #6a1b9a; border: none; }
+    .btn-txns:hover { background: #4a148c; }
+
+    /* ✅ New: Earnings Button Style */
+    .btn-earnings { background: #00796b; border: none; }
+    .btn-earnings:hover { background: #004d40; transform: scale(1.05); }
+
+    .icon { font-size: 22px; }
+
+    @media (max-width: 768px) {
+      #sidebar { width: 60px; padding-top: 20px; }
+      #sidebar a { justify-content: center; gap: 0; padding: 12px 0; font-size: 12px; }
+      #main-content { margin-left: 70px; padding: 20px; }
+      .top-nav h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <h4>Admin</h4>
+  <a href="/admin/dashboard"><i class="fas fa-home icon"></i> Dashboard</a>
+  
+  <!-- ✅ Transactions & Earnings Links -->
+  <a href="/admin/transactions"><i class="fas fa-exchange-alt icon"></i> Transactions</a>
+  <a href="/admin/orders/earnings"><i class="fas fa-chart-line icon"></i> Admin Earnings</a>
+
+  <a href="/admin/orders"><i class="fas fa-shopping-cart icon"></i> All Orders</a>
+  <a href="/admin/sellers/master-list"><i class="fas fa-list-ol icon"></i> Seller Master List</a>
+  <a href="/admin/drops"><i class="fas fa-apple-alt icon"></i> Drops List</a>
+  <a href="/admin/deals"><i class="fas fa-bolt icon"></i> 24-Hour Deals</a>
+  <a href="/admin/sellers"><i class="fas fa-store icon"></i> Sellers</a>
+  <a href="/admin/payouts"><i class="fas fa-money-bill-wave icon"></i> Payout Requests</a> 
+  <a href="/admin/sellers/pending"><i class="fas fa-clock icon"></i> Pending Sellers</a>
+  <a href="/admin/logout"><i class="fas fa-sign-out-alt icon"></i> Logout</a>
+</div>
+
+<!-- Main Content -->
+<div id="main-content"> 
+  <div class="top-nav">
+    <h1>Welcome, <%= user.name %>!</h1>
+    <span>Admin Panel</span>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- ✅ NEW: Admin Earnings Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+          <h3><i class="fas fa-chart-line icon"></i> My Revenue</h3>
+          <p>Analyze 10% platform commission and delivery fee profits.</p>
+          <a href="/admin/orders/earnings" class="btn btn-primary btn-earnings">View My Earnings</a>
+        </div>
+    </div>
+
+    <!-- Transactions Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+          <h3><i class="fas fa-exchange-alt icon"></i> Audit Trail</h3>
+          <p>Monitor all credits, debits, game rewards, and reversals.</p>
+          <a href="/admin/transactions" class="btn btn-primary btn-txns">View All Transactions</a>
+        </div>
+    </div>
+
+    <!-- Orders Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+          <h3><i class="fas fa-shopping-cart icon"></i> User Orders</h3>
+          <p>View all orders placed by users (Paid/Pending).</p>
+          <a href="/admin/orders" class="btn btn-primary btn-orders">View All Orders</a>
+        </div>
+    </div>
+
+    <!-- Seller Master List -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <h3><i class="fas fa-list-ol icon"></i> Seller Stats</h3>
+        <p>View Revenue, VIP Score, and Performance of all sellers.</p>
+        <a href="/admin/sellers/master-list" class="btn btn-primary btn-master">View Master List</a>
+      </div>
+    </div>
+
+    <!-- Payout Requests -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <h3><i class="fas fa-money-bill-wave icon"></i> Payouts</h3>
+        <p>Approve or Reject seller withdrawal requests.</p>
+        <a href="/admin/payouts" class="btn btn-primary">Manage Payouts</a>
+      </div>
+    </div>
+
+    <!-- Manage Drops -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <h3><i class="fas fa-apple-alt icon"></i> Manage Drops</h3>
+        <p>Control the 15-minute flash drops inventory.</p>
+        <a href="/admin/drops" class="btn btn-primary">Go to Drops List</a>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

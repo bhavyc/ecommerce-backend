@@ -1,0 +1,275 @@
+<!-- views/seller/wallet.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Wallet - Seller</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background: #f0f4f7; color: #333; }
+
+    /* Header Styles */
+    header { background: #1e7d32; color: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+    nav a { color: #fff; text-decoration: none; margin-left: 15px; font-weight: 500; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.2); transition: all .3s ease; }
+    nav a:hover { background: #ffffff30; transform: scale(1.05); }
+    nav a.active { background: #fff; color: #1e7d32; font-weight: bold; }
+    nav a.logout { background:#b00020; }
+
+    main { padding: 40px; max-width: 1200px; margin: 0 auto; }
+    h2 { color: #1e7d32; font-size: 28px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+    /* Layout */
+    .wallet-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr; /* 1/3 Left, 2/3 Right */
+      gap: 30px;
+    }
+
+    /* --- LEFT SIDE: BALANCES --- */
+    .balance-section { display: flex; flex-direction: column; gap: 20px; }
+
+    .card-available {
+      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+      color: white; padding: 25px; border-radius: 15px; text-align: center;
+      box-shadow: 0 8px 16px rgba(46, 125, 50, 0.2);
+    }
+    .card-available h3 { margin: 0; font-weight: 400; opacity: 0.9; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .card-available h1 { font-size: 36px; margin: 10px 0; font-weight: 700; }
+
+    .card-pending {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: white; padding: 20px; border-radius: 15px; text-align: center;
+      box-shadow: 0 8px 16px rgba(245, 124, 0, 0.2);
+    }
+    .card-pending h3 { margin: 0; font-weight: 400; opacity: 0.9; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .card-pending h2 { font-size: 28px; margin: 10px 0; font-weight: 700; }
+    .info-tooltip { font-size: 11px; opacity: 0.8; margin-top: 5px; }
+
+    .withdraw-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .wallet-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; outline: none; margin-bottom: 10px; }
+    .btn-withdraw {
+      background: #1e7d32; color: white; font-weight: bold; border: none; padding: 12px;
+      border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s;
+    }
+    .btn-withdraw:hover { background: #145d23; }
+    .btn-withdraw:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* --- RIGHT SIDE: HISTORY --- */
+    .history-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #1e7d32; background: #f9f9f9; }
+    td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+    
+    .badge { padding: 5px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .badge.PENDING { background: #fff3cd; color: #856404; }
+    .badge.APPROVED { background: #d4edda; color: #155724; }
+    .badge.REJECTED { background: #f8d7da; color: #721c24; }
+    .badge.PAID { background: #cce5ff; color: #004085; }
+
+    /* --- PAGINATION STYLES --- */
+    .pagination-container {
+      display: flex; justify-content: center; align-items: center;
+      margin-top: 25px; gap: 15px; padding-top: 10px; border-top: 1px solid #eee;
+    }
+    .btn-page {
+      background: #1e7d32; color: white; border: none;
+      padding: 8px 18px; border-radius: 8px; cursor: pointer;
+      font-weight: 600; font-size: 14px; transition: 0.3s;
+    }
+    .btn-page:hover:not(:disabled) { background: #145d23; transform: translateY(-2px); }
+    .btn-page:disabled { background: #ccc; cursor: not-allowed; }
+    #pageInfo { font-size: 14px; color: #666; font-weight: 500; }
+
+    @media (max-width: 768px) {
+      .wallet-container { grid-template-columns: 1fr; }
+      header { flex-direction: column; gap: 10px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Wallet</h1>
+    <nav>
+      <a href="/seller/dashboard">Dashboard</a>
+      <a href="/seller/inventory">Inventory</a>
+      <a href="/seller/wallet" class="active">Wallet</a>
+      <a href="/seller/auth/logout" class="logout">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Financial Overview</h2>
+
+    <div class="wallet-container">
+      <!-- LEFT SIDE -->
+      <div class="balance-section">
+        <div class="card-available">
+          <h3>Available to Withdraw</h3>
+          <h1 id="walletBalance">₹0.00</h1>
+        </div>
+
+        <div class="card-pending">
+          <h3>On Hold (Pending)</h3>
+          <h2 id="pendingBalance">₹0.00</h2>
+          <div class="info-tooltip">
+            <i class="fas fa-info-circle"></i> Funds move to 'Available' after validation.
+          </div>
+        </div>
+
+        <div class="withdraw-box">
+            <h4 style="margin-top:0; color:#333;">Request Payout</h4>
+            <input type="number" id="payoutAmount" class="wallet-input" placeholder="Amount (Min ₹100)">
+            <button onclick="requestPayout()" class="btn-withdraw">Withdraw Now</button>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: HISTORY WITH PAGINATION -->
+      <div class="history-card">
+        <h3 style="color: #333; margin-top: 0;">Recent Payout Requests</h3>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Admin Note</th>
+              </tr>
+            </thead>
+            <tbody id="payoutHistoryBody">
+              <tr><td colspan="4" style="text-align:center;">Loading history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container" id="paginationControls" style="display: none;">
+          <button id="prevBtn" class="btn-page" onclick="changePage(-1)">Previous</button>
+          <span id="pageInfo">Page 1 of 1</span>
+          <button id="nextBtn" class="btn-page" onclick="changePage(1)">Next</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await fetchWalletData();
+      await fetchHistory(1); // Page 1 se load karo
+    });
+
+    async function fetchWalletData() {
+      try {
+        const res = await fetch("/seller/payouts/balance");
+        const data = await res.json();
+        if(data.success) {
+          document.getElementById("walletBalance").innerText = `₹${(data.walletBalance || 0).toFixed(2)}`;
+          document.getElementById("pendingBalance").innerText = `₹${(data.pendingBalance || 0).toFixed(2)}`;
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function fetchHistory(page) {
+      try {
+        const tbody = document.getElementById("payoutHistoryBody");
+        const pagControls = document.getElementById("paginationControls");
+        
+        const res = await fetch(`/seller/payouts/history?page=${page}&limit=10`);
+        const data = await res.json();
+        
+        tbody.innerHTML = ""; 
+
+        if(data.success && data.payouts && data.payouts.length > 0) {
+          data.payouts.forEach(pay => {
+            const dateStr = new Date(pay.createdAt).toLocaleDateString();
+            const row = `<tr>
+              <td>${dateStr}</td>
+              <td style="font-weight:bold; color:#1e7d32;">₹${pay.amount}</td>
+              <td><span class="badge ${pay.status}">${pay.status}</span></td>
+              <td style="font-size:12px; color:#666;">${pay.adminNote || '-'}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+
+          // Pagination logic
+          currentPage = data.currentPage;
+          totalPages = data.totalPages;
+          
+          document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPages}`;
+          document.getElementById("prevBtn").disabled = (currentPage === 1);
+          document.getElementById("nextBtn").disabled = (currentPage === totalPages);
+          pagControls.style.display = "flex";
+
+        } else {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#777;">No payout requests found</td></tr>`;
+          pagControls.style.display = "none";
+        }
+      } catch(err) { 
+        console.error(err);
+        document.getElementById("payoutHistoryBody").innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Failed to load history</td></tr>`;
+      }
+    }
+
+    async function changePage(offset) {
+      const targetPage = currentPage + offset;
+      if(targetPage >= 1 && targetPage <= totalPages) {
+        await fetchHistory(targetPage);
+        // Table par scroll back karein
+        document.querySelector('.history-card').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    async function requestPayout() {
+      const amount = document.getElementById("payoutAmount").value;
+      const btn = document.querySelector(".btn-withdraw");
+
+      if (!amount || amount < 100) {
+        showToast("Minimum withdrawal is ₹100", "#b00020");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "Sending...";
+
+        const res = await fetch("/seller/payouts/request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: amount })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast("Request Sent Successfully!", "#2e7d32");
+          document.getElementById("payoutAmount").value = "";
+          await fetchWalletData();
+          await fetchHistory(1); // Pehle page par wapas le jao updated data ke sath
+        } else {
+          showToast(data.message, "#b00020");
+        }
+      } catch (err) {
+        showToast("Error requesting payout", "#b00020");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Withdraw Now";
+      }
+    }
+
+    function showToast(text, color) {
+      Toastify({ text: text, style: { background: color } }).showToast();
+    }
+  </script>
+</body>
+</html>

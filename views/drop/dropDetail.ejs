@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= drop.title %> | Fruit Drop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #d4f7d4, #a3e4a3);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+    }
+    .navbar {
+      background-color: #2e7d32;
+      border-radius: 10px;
+      padding: 12px 20px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar a {
+      color: white;
+      font-weight: 600;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+    .navbar a:hover { text-decoration: underline; }
+    .drop-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0px 6px 16px rgba(0,128,0,0.25);
+      max-width: 700px;
+      margin: auto;
+      text-align: center;
+    }
+    h1 { color: #2e7d32; font-weight: bold; margin-bottom: 15px; }
+    .info { font-size: 18px; margin: 8px 0; }
+    .btn-claim {
+      background-color: #2e7d32;
+      color: white;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      margin-top: 20px;
+      transition: 0.3s ease;
+    }
+    .btn-claim:hover { background-color: #1b5e20; }
+    .claimed { color: #2e7d32; font-size: 18px; font-weight: bold; margin-top: 20px; }
+    .back-link {
+      display: inline-block;
+      margin-top: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .membership-note { color: #e53935; font-style: italic; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div><a href="/">🍏 Fruit Drops</a></div>
+    <div><a href="/auth/profile">Profile</a> <a href="/auth/logout">Logout</a></div>
+  </div>
+
+  <!-- Drop Details Card -->
+  <div class="drop-card">
+    <h1><%= drop.title %></h1>
+    <p class="info"><%= drop.description %></p>
+
+    <!-- Price & Discount -->
+    <p class="info">💰 <strong>Price:</strong> ₹<%= finalPrice.toFixed(2) %></p>
+    <% if(!user.isMember){ %>
+      <p class="membership-note">Become a member to get a 20% discount!</p>
+    <% } %>
+
+    <p class="info">⏳ <strong>Starts:</strong> <%= drop.startTime.toLocaleString() %></p>
+    <p class="info">⏳ <strong>Ends:</strong> <%= drop.endTime.toLocaleString() %></p>
+    <p class="info">👥 <strong>Total Claims:</strong> <%= totalClaims %></p>
+
+    <!-- Claim Button -->
+    <% if(user.isMember){ %>
+      <% if(alreadyClaimed){ %>
+        <p class="claimed">✅ You already claimed this drop</p>
+      <% } else { %>
+        <form action="/drops/<%= drop._id %>/claim" method="POST">
+          <button type="submit" class="btn-claim">Claim Drop</button>
+        </form>
+      <% } %>
+    <% } else { %>
+      <p class="membership-note">Only members can claim drops. Join now!</p>
+    <% } %>
+
+    <a href="/drops" class="back-link">⬅ Back to all drops</a>
+  </div>
+</body>
+</html>

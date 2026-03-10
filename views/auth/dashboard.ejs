@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fruit Drops Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f1f5f9; min-height: 100vh; }
+    .header { padding: 1rem; background: linear-gradient(to right,#a8e063,#56ab2f); color:#fff; display:flex; justify-content:space-between; align-items:center; }
+    .card-drop { border-radius: 1rem; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition: transform 0.3s; position:relative;}
+    .card-drop:hover { transform: scale(1.05); }
+    .btn-claim { background: #56ab2f; border:none; }
+    .btn-claim:hover { background:#3e8e41; }
+    .discount { font-weight:bold; color:#d9534f; }
+    .countdown { position:absolute; top:10px; right:10px; background:#fff; padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:bold;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Fruit Drops</h2>
+    <button class="btn btn-light" id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="container mt-4">
+    <div class="row" id="dropsContainer">
+      <% drops.forEach(drop => { %>
+      <div class="col-md-4 mb-4">
+        <div class="card card-drop" id="drop-<%= drop._id %>">
+          <span class="countdown" id="countdown-<%= drop._id %>"></span>
+          <img src="<%= drop.image %>" class="card-img-top" alt="<%= drop.title %>">
+          <div class="card-body">
+            <h5 class="card-title"><%= drop.title %></h5>
+            <p class="card-text"><%= drop.description %></p>
+            <p>
+              Price:
+              <% if(drop.finalPrice < drop.price){ %>
+                <span class="text-decoration-line-through">₹<%= drop.price %></span>
+                <span class="discount">₹<%= drop.finalPrice %></span>
+              <% } else { %>
+                ₹<%= drop.price %>
+              <% } %>
+            </p>
+            <button class="btn btn-claim w-100" onclick="claimDrop('<%= drop._id %>')" <%= drop.alreadyClaimed ? 'disabled' : '' %>>
+              <span id="claimed-<%= drop._id %>"><%= drop.alreadyClaimed ? 'Claimed' : 'Claim' %></span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <script>
+    const token = "<%= user.token %>";
+    const userId = "<%= user._id %>";
+
+    
+    const claimDrop = async (id) => {
+      try {
+        const res = await fetch('/drops/' + id + '/claim', {
+          method: 'POST',
+          headers: { 
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await res.json();
+        if(data.success){
+          const btn = document.getElementById(`claimed-${id}`);
+          if(btn) btn.innerText = "Claimed!";
+          alert(data.message);
+        } else {
+          alert(data.message);
+        }
+      } catch(err) {
+        console.error(err);
+        alert("Error claiming drop");
+      }
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    });
+
+    // Countdown timers
+    const drops = <%- JSON.stringify(drops) %>;
+    drops.forEach(drop => {
+      const countdownEl = document.getElementById(`countdown-${drop._id}`);
+      const endTime = new Date(drop.endTime).getTime();
+
+      const interval = setInterval(() => {
+        const now = new Date().getTime();
+        let distance = endTime - now;
+
+        if(distance < 0){
+          countdownEl.innerText = "Expired";
+          const card = document.getElementById(`drop-${drop._id}`);
+          if(card) card.remove();
+          clearInterval(interval);
+          return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000*60*60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000*60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdownEl.innerText = `${hours}h ${minutes}m ${seconds}s`;
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Drops</title>
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #d0f0c0, #a8e6cf);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+
+    .card {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      border: none;
+    }
+
+    h3 {
+      color: #1b5e20;
+      font-weight: 600;
+    }
+
+    /* Table */
+    .table thead th {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      font-weight: 500;
+    }
+
+    .table tbody tr:hover {
+      background-color: #c8e6c9;
+      transition: background 0.3s;
+    }
+
+    /* Buttons */
+    .btn-create {
+      border-radius: 50px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+      background-color: #43a047;
+      color: white;
+      transition: background 0.3s, transform 0.3s;
+      border: none;
+    }
+
+    .btn-create:hover {
+      background-color: #2e7d32;
+      transform: translateY(-2px);
+    }
+
+    /* Badge */
+    .badge-featured {
+      background-color: #aed581;
+      color: #1b5e20;
+      font-weight: 500;
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+      color: #2e7d32;
+      border-radius: 8px;
+      margin: 0 3px;
+      border: none;
+    }
+
+    .pagination .page-item.active .page-link {
+      background-color: #2e7d32;
+      color: white;
+    }
+
+    .pagination .page-link:hover {
+      background-color: #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .pagination .page-item.disabled .page-link {
+      color: #9e9e9e;
+      pointer-events: none;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>All Drops</h3>
+      <a href="/admin/drops/create" class="btn btn-create">
+        Create New Drop
+      </a>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card p-3">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Featured</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (drops.length === 0) { %>
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                No drops found
+              </td>
+            </tr>
+          <% } %>
+
+          <% drops.forEach(drop => { %>
+            <tr>
+              <td><strong><%= drop.title %></strong></td>
+
+              <td>₹<%= drop.price.toFixed(2) %></td>
+
+              <td>
+                <%= drop.startTime
+                  ? new Date(drop.startTime).toLocaleString()
+                  : 'N/A' %>
+              </td>
+
+              <td>
+                <%= drop.endTime
+                  ? new Date(drop.endTime).toLocaleString()
+                  : 'N/A' %>
+              </td>
+
+              <td>
+                <% if (drop.featured) { %>
+                  <span class="badge-featured">Yes</span>
+                <% } else { %>
+                  No
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+          <!-- Previous -->
+          <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage - 1 %>">
+              Previous
+            </a>
+          </li>
+
+          <!-- Page Numbers -->
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+          <% } %>
+
+          <!-- Next -->
+          <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage + 1 %>">
+              Next
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+    <% } %>
+
+  </div>
+</body>
+</html>

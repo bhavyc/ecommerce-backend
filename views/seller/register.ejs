@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Registration</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #198754;
+      --primary-hover: #146c43;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --input-border: #d1d5db;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(#198754 0.5px, transparent 0.5px), radial-gradient(#198754 0.5px, var(--bg-color) 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-main);
+    }
+
+    .container {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 550px;
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 35px;
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: -0.5px;
+    }
+
+    /* Progress Indicator Styling */
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 40px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #e5e7eb;
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
+    .step-indicator span {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .step-indicator span.active {
+      border-color: var(--primary-color);
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2);
+    }
+
+    /* Form Elements */
+    label {
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15);
+      outline: none;
+    }
+
+    .row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    /* Buttons */
+    .step-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      gap: 15px;
+    }
+
+    button {
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+    }
+
+    button[onclick^="next"], button[type="submit"] {
+      background-color: var(--primary-color);
+      color: white;
+      border: 1px solid var(--primary-color);
+    }
+
+    button[onclick^="next"]:hover, button[type="submit"]:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    button[onclick^="prev"] {
+      background-color: white;
+      color: var(--text-main);
+      border: 1px solid var(--input-border);
+    }
+
+    button[onclick^="prev"]:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    .step {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    
+    .step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .form-check-label {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .login-link {
+      margin-top: 25px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    /* Modal Specific Styles */
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    .modal-title {
+        font-weight: 600;
+    }
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    .modal-body h6 {
+        color: var(--primary-color);
+        margin-top: 15px;
+        font-weight: 700;
+    }
+    .modal-body p {
+        font-size: 0.95rem;
+        color: #555;
+    }
+    
+    /* Warning text inside modal */
+    .warning-text {
+        color: #dc3545; /* Bootstrap Danger Color */
+        background: rgba(220, 53, 69, 0.1);
+        padding: 10px;
+        border-left: 4px solid #dc3545;
+        font-weight: 600;
+        border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Seller Registration</h1>
+
+    <div class="step-indicator">
+      <span id="dot1" class="active">1</span>
+      <span id="dot2">2</span>
+      <span id="dot3">3</span>
+    </div>
+
+    <form id="sellerForm" action="/seller/auth/register" method="POST" enctype="multipart/form-data">
+
+      <!-- Step 1: Account Info -->
+      <div class="step active" id="step1">
+        <label>Full Name</label>
+        <input type="text" name="name" placeholder="Enter Name" required />
+
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="Enter Email" required />
+
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required />
+
+        <div class="step-buttons">
+            <div style="flex:1"></div> 
+            <button type="button" onclick="nextStep(1)">Next Step &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Business Details -->
+      <div class="step" id="step2">
+        <label>Business Name</label>
+        <input type="text" name="businessName" placeholder="Enter Business Name" required />
+
+        <div class="row-grid">
+            <div>
+                <label>Business Type</label>
+                <select name="businessType" required>
+                  <option value="" disabled selected>Select Type</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Company">Company</option>
+                </select>
+            </div>
+            <div>
+                <label>PAN Number</label>
+                <input type="text" name="panNumber" placeholder="Enter PAN Number" required />
+            </div>
+        </div>
+
+        <label>GST Number <span style="color:#999; font-weight:normal;">(Optional)</span></label>
+        <input type="text" name="gstNumber" placeholder="Enter GST Number" />
+
+        <div class="row-grid">
+            <div>
+                <label>Bank Account Number</label>
+                <input type="text" name="bankAccountNo" required />
+            </div>
+            <div>
+                <label>IFSC Code</label>
+                <input type="text" name="ifscCode" required />
+            </div>
+        </div>
+
+        <div class="step-buttons">
+          <button type="button" onclick="prevStep(2)">&larr; Back</button>
+          <button type="button" onclick="nextStep(2)">Next Step &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Address & Docs -->
+      <div class="step" id="step3">
+        <label>Street Address</label>
+        <input type="text" name="address" placeholder="Enter Address" required />
+
+        <div class="row-grid">
+            <input type="text" name="city" placeholder="City" required />
+            <input type="text" name="state" placeholder="State" required />
+        </div>
+        <input type="text" name="pincode" placeholder="Pincode / Zip" style="width: 50%;" required />
+
+        <hr style="border-top: 1px solid #eee; margin: 20px 0;">
+        <h6 style="color:var(--text-main); margin-bottom:15px;">Upload Documents</h6>
+
+        <div class="mb-3">
+            <label>PAN Card Document</label>
+            <input type="file" class="form-control" name="panDoc" accept=".jpg,.png,.pdf" required />
+        </div>
+
+        <div class="mb-3">
+            <label>GST Document</label>
+            <input type="file" class="form-control" name="gstDoc" accept=".jpg,.png,.pdf" />
+        </div>
+
+        <div class="mb-3">
+            <label>Cancelled Cheque / Bank Proof</label>
+            <input type="file" class="form-control" name="bankDoc" accept=".jpg,.png,.pdf" required />
+        </div>
+
+        <!-- Declarations -->
+        <div class="card p-3 bg-light border-0 mb-3">
+          <!-- Terms Checkbox -->
+          <div class="form-check mb-2">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="termsAccepted" 
+              name="termsAccepted" 
+              required
+            >
+            <label class="form-check-label" for="termsAccepted">
+              I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a>
+            </label>
+          </div>
+
+          <!-- Made in India Checkbox with NEW MODAL LINK -->
+          <div class="form-check">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="indianGoods" 
+              name="indianGoods" 
+              required
+            >
+            <label class="form-check-label" for="indianGoods">
+              I confirm >50% of goods are Made in India 
+              <a href="#" data-bs-toggle="modal" data-bs-target="#madeInIndiaModal" style="font-size: 0.85rem; margin-left: 5px;">(Read Policy)</a>
+            </label>
+          </div>
+        </div>
+
+        <div class="step-buttons">
+          <button type="button" onclick="prevStep(3)">&larr; Back</button>
+          <button type="submit">Complete Registration</button>
+        </div>
+      </div>
+    </form>
+
+    <p class="text-center login-link">
+      Already have a seller account? <a href="/seller/auth/login">Login here</a>
+    </p>
+  </div>
+
+  <!-- 1. TERMS AND CONDITIONS MODAL -->
+  <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Terms & Conditions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h6>1. Introduction</h6>
+            <p>Welcome to our platform. By registering as a seller, you agree to comply with and be bound by the following terms and conditions.</p>
+            <h6>2. Fees & Payments</h6>
+            <p>A commission fee will be deducted from the final sale price. Payments are processed within 7 days.</p>
+            <h6>3. General Conduct</h6>
+            <p>Sellers must maintain professionalism. Abuse of customers or other sellers results in a ban.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MADE IN INDIA POLICY MODAL (NEW) -->
+  <div class="modal fade" id="madeInIndiaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header" style="background-color: #d63384; color: white;">
+          <h5 class="modal-title">Origin of Goods Policy</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            
+            <p class="warning-text">
+              ⚠️ CRITICAL WARNING: If your goods are found to contain less than 60% Indian content, your registration will be IMMEDIATELY CANCELLED.
+            </p>
+
+            <h6>1. The 60% Threshold</h6>
+            <p>While the general checkbox requires >50%, our platform enforces a strict <strong>60% Made in India</strong> rule for quality assurance. If your products fall below this 60% threshold during any inspection, your account will be suspended.</p>
+
+            <h6>2. Random Audits</h6>
+            <p>We reserve the right to conduct random physical or digital audits. You may be asked to provide raw material invoices or manufacturing proof within 48 hours.</p>
+
+            <h6>3. Non-Compliance Penalties</h6>
+            <p>If you fail to prove origin or if goods are imported and relabeled:</p>
+            <ul>
+              <li>Your account will be permanently banned.</li>
+              <li>Any pending payouts will be frozen for 90 days.</li>
+              <li>You will be blacklisted from future registrations.</li>
+            </ul>
+
+            <h6>4. Self-Certification</h6>
+            <p>By checking the box, you are self-certifying the origin. False claims are treated as fraud under platform rules.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">I Understand</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function nextStep(current) {
+      document.getElementById(`step${current}`).classList.remove('active');
+      document.getElementById(`step${current+1}`).classList.add('active');
+      updateDots(current + 1);
+    }
+    function prevStep(current) {
+       document.getElementById(`step${current}`).classList.remove('active');
+      document.getElementById(`step${current-1}`).classList.add('active');
+      updateDots(current - 1);
+    }
+    function updateDots(step) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`dot${i}`).classList.remove('active');
+      }
+      document.getElementById(`dot${step}`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product | BharatMart Seller</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f4f6f8; color: #333; margin: 0; padding: 0; }
+    header { background: #1e7d32; color: white; padding: 20px 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    main { max-width: 550px; margin: 40px auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    
+    h1 { margin: 0; font-size: 24px; }
+    form label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
+    
+    form input, form select, form textarea { 
+      width: 100%; 
+      padding: 12px; 
+      margin-bottom: 20px; 
+      border-radius: 8px; 
+      border: 1px solid #ddd; 
+      font-size: 14px; 
+      outline: none; 
+      box-sizing: border-box;
+      transition: border 0.3s ease;
+    }
+    
+    form input:focus, form select:focus, form textarea:focus { 
+      border-color: #1e7d32; 
+      box-shadow: 0 0 0 3px rgba(30,125,50,0.1); 
+    }
+
+    /* Custom File Upload Styling */
+    .file-input-container {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      background: #fafafa;
+      transition: all 0.3s ease;
+    }
+    .file-input-container:hover { border-color: #1e7d32; background: #f0f9f1; }
+    #imagePreview { 
+      width: 100%; 
+      max-height: 200px; 
+      object-fit: contain; 
+      margin-top: 10px; 
+      display: none; 
+      border-radius: 6px;
+    }
+
+    button { 
+      background: #1e7d32; 
+      color: white; 
+      border: none; 
+      padding: 14px 20px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 16px; 
+      font-weight: 600;
+      width: 100%; 
+      transition: background 0.3s ease;
+    }
+    button:hover { background: #145d23; }
+    
+    .back-link { 
+      display: block; 
+      margin-top: 25px; 
+      color: #666; 
+      text-decoration: none; 
+      font-size: 14px; 
+      text-align: center; 
+    }
+    .back-link:hover { color: #1e7d32; text-decoration: underline; }
+    
+    .input-group { display: flex; gap: 15px; }
+    .input-group div { flex: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BharatMart Seller Panel</h1>
+  </header>
+
+  <main>
+    <h2 style="margin-top: 0; margin-bottom: 25px; text-align: center;">Add New Product</h2>
+    
+    <!-- ⚠️ IMPORTANT: enctype="multipart/form-data" is added here -->
+    <form action="/seller/add" method="POST" enctype="multipart/form-data">
+      
+      <label for="title">Product Title:</label>
+      <input type="text" id="title" name="title" placeholder="e.g. Alphonso Mangoes (1 Dozen)" required />
+
+      <label for="category">Category:</label>
+      <select id="category" name="category" required>
+        <option value="" disabled selected>Select Category</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Vegetables">Vegetables</option>
+        <option value="Groceries">Groceries</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Fashion">Fashion</option>
+        <option value="Home & Kitchen">Home & Kitchen</option>
+        <option value="Beauty">Beauty</option>
+        <option value="Books">Books</option>
+        <option value="Others">Others</option>
+      </select>
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" rows="3" placeholder="Tell customers about your product..." required></textarea>
+
+      <div class="input-group">
+        <div>
+          <label for="price">Price (₹):</label>
+          <input type="number" id="price" name="price" min="1" placeholder="99" required />
+        </div>
+        <div>
+          <label for="discount">Discount (%):</label>
+          <input type="number" id="discount" name="discount" min="0" max="100" value="0" />
+        </div>
+      </div>
+
+      <label>Product Image:</label>
+      <div class="file-input-container" onclick="document.getElementById('imageInput').click()">
+        <span id="fileLabel">Click to upload photo</span>
+        <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;" required onchange="previewImage(event)" />
+        <img id="imagePreview" alt="Image Preview" />
+      </div>
+
+      <button type="submit">🚀 List Product</button>
+    </form>
+
+    <a href="/seller/dashboard" class="back-link">← Cancel and Back to Dashboard</a>
+  </main>
+
+  <script>
+    // Photo select karne par preview dikhane ka function
+    function previewImage(event) {
+      const reader = new FileReader();
+      const imagePreview = document.getElementById('imagePreview');
+      const fileLabel = document.getElementById('fileLabel');
+
+      reader.onload = function() {
+        if (reader.readyState === 2) {
+          imagePreview.src = reader.result;
+          imagePreview.style.display = 'block';
+          fileLabel.innerText = "Photo Selected (Click to change)";
+        }
+      }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Q&A</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+<h2>Product Q&A</h2>
+
+<!-- Ask Question -->
+<form action="/qa/<%= productId %>/question" method="POST" class="mb-4">
+  <input type="text" name="question" placeholder="Ask a question..." class="form-control mb-2" required>
+  <button class="btn btn-primary">Submit Question</button>
+</form>
+
+<!-- Q&A List -->
+<% qas.forEach(q => { %>
+  <div class="border p-3 rounded mb-3">
+
+    <h5><strong>Q:</strong> <%= q.question %></h5>
+    <p class="text-muted">Asked by: <%= q.user?.name || "User" %></p>
+
+    <!-- Answer list -->
+    <% q.answers.forEach(a => { %>
+      <div class="ms-3 p-2 bg-light rounded mb-2">
+        <strong>A:</strong> <%= a.answer %><br>
+        <small class="text-muted">Answered by: <%= a.user?.name || "User" %></small>
+      </div>
+    <% }) %>
+
+    <!-- Add Answer -->
+    <form action="/qa/<%= productId %>/<%= q._id %>/answer" method="POST" class="ms-3 mt-2">
+      <input type="text" name="answer" placeholder="Write an answer..." class="form-control mb-2" required>
+      <button class="btn btn-success btn-sm">Reply</button>
+    </form>
+
+  </div>
+<% }) %>
+
+</body>
+</html>

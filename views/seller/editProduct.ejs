@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Edit Product</title></head>
+<body>
+  <h2>Edit Product</h2>
+  <form method="POST" action="/seller/product/edit/<%= product._id %>">
+    <label>Title:</label><input type="text" name="title" value="<%= product.title %>" required><br>
+    <label>Description:</label><textarea name="description"><%= product.description %></textarea><br>
+    <label>Price:</label><input type="number" name="price" value="<%= product.price %>" required><br>
+    <label>Discount:</label><input type="number" name="discount" value="<%= product.discount %>"><br>
+    <label>Category:</label><input type="text" name="category" value="<%= product.category %>"><br>
+    <button type="submit">Update</button>
+  </form>
+</body>
+</html>

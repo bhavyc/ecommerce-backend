@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Drop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head> 
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4>Create Drop</h4>
+      </div>
+      
+      <div class="card-body p-4">
+
+        <% if (error) { %>
+          <div class="alert alert-danger text-center"><%= error %></div>
+        <% } %>
+
+        <form action="/admin/drops/create" method="POST">
+
+          <!-- Select Normal Deal -->
+          <div class="mb-3">
+            <label class="form-label">Choose from Normal Deals (Optional)</label>
+            <select id="normalDealSelect" class="form-select">
+              <option value="">-- Select a Normal Deal --</option>
+              <% normalDeals.forEach(deal => { %>
+                <option 
+                  value="<%= deal._id %>" 
+                  data-title="<%= deal.title %>" 
+                  data-description="<%= deal.description %>" 
+                  data-image="<%= deal.image %>" 
+                  data-price="<%= deal.price %>">
+                  <%= deal.title %> - ₹<%= deal.price %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Drop Preview -->
+          <div id="dealPreview" class="text-center mb-3" style="display:none;">
+            <img id="previewImage" src="" class="img-fluid mb-2" style="max-height:150px; border-radius:10px;">
+            <h5 id="previewTitle"></h5>
+            <p id="previewDescription" class="text-muted"></p>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Enter drop title" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Image URL</label>
+            <input type="text" name="image" class="form-control" placeholder="Paste image link or upload URL">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Price (₹)</label>
+            <input type="number" step="0.01" name="price" class="form-control" placeholder="Enter price" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Discount (%)</label>
+            <input type="number" name="discount" class="form-control" min="0" max="100" value="0">
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="featured" id="featured">
+            <label class="form-check-label" for="featured">Mark as Featured</label>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-5">Create Drop</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const select = document.getElementById("normalDealSelect");
+  const preview = document.getElementById("dealPreview");
+  const img = document.getElementById("previewImage");
+  const title = document.getElementById("previewTitle");
+  const desc = document.getElementById("previewDescription");
+
+  select.addEventListener("change", function() {
+    const opt = this.options[this.selectedIndex];
+    if (!opt.value) { preview.style.display = "none"; return; }
+
+    document.querySelector('input[name="title"]').value = opt.dataset.title;
+    document.querySelector('textarea[name="description"]').value = opt.dataset.description;
+    document.querySelector('input[name="image"]').value = opt.dataset.image;
+    document.querySelector('input[name="price"]').value = opt.dataset.price;
+
+    img.src = opt.dataset.image;
+    title.textContent = opt.dataset.title;
+    desc.textContent = opt.dataset.description;
+    preview.style.display = "block";
+  });
+  </script>
+</body>
+</html>

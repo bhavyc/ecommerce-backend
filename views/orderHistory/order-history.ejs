@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Orders</title>
+
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #222;
+        }
+
+        .order-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+
+        .order-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .order-id {
+            font-size: 17px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .Pending { background: #ff9800; }
+        .Processing { background: #2196F3; }
+        .Shipped { background: #673AB7; }
+        .Delivered { background: #4CAF50; }
+        .Cancelled { background: #F44336; }
+
+        .order-info {
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .items-list {
+            margin-top: 10px;
+            padding-left: 18px;
+        }
+
+        .items-list li {
+            margin-bottom: 6px;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .amount {
+            font-weight: bold;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            font-size: 18px;
+            color: #777;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>Your Order History</h2>
+
+        <% if (orders.length === 0) { %>
+            <div class="no-orders">
+                No orders found.
+            </div>
+        <% } else { %>
+
+            <% orders.forEach(order => { %>
+                <div class="order-card">
+                    
+                    <div class="order-header">
+                        <div class="order-id">Order #<%= order._id %></div>
+                        <div class="status <%= order.orderStatus %>">
+                            <%= order.orderStatus %>
+                        </div>
+                    </div>
+
+                    <p class="order-info">
+                        Placed At: <%= order.createdAt.toDateString() %>
+                    </p>
+
+                    <p class="order-info amount">
+                        Total Amount: ₹<%= order.totalAmount %>
+                    </p>
+
+                    <h4>Items:</h4>
+                    <ul class="items-list">
+                        <% order.items.forEach(item => { %>
+                            <li>
+                                <b><%= item.title %></b>  
+                                (Qty: <%= item.quantity %>) —  
+                                ₹<%= item.subtotal %>
+                            </li>
+                        <% }); %>
+                    </ul>
+
+                </div>
+            <% }); %>
+
+        <% } %>
+
+    </div>
+</body>
+</html>

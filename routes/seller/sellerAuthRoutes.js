@@ -1,0 +1,44 @@
+const express = require("express");
+const router = express.Router();
+const sellerAuthController = require("../../controllers/seller/sellerAuthController");
+const digilockerController = require("../../controllers/seller/digilockerController");
+const { onboardingMiddleware } = require("../../middleware/seller/authMiddleware");
+// ===== GET ROUTES =====
+// Render registration form
+router.get("/register", (req, res) => {
+  res.render("seller/register"); // views/seller/register.ejs
+});
+
+    
+
+
+
+router.get("/under-review", sellerAuthController.underReview);
+// Render login form
+router.get("/login", (req, res) => {
+  res.render("seller/login"); // views/seller/login.ejs
+});
+                                                                   
+
+
+// ===== POST ROUTES =====
+// Seller registration
+router.post("/register", sellerAuthController.register);
+
+// Seller login
+router.post("/login", sellerAuthController.login);
+
+// Seller logout
+router.get("/logout", sellerAuthController.logout);
+
+
+
+
+
+// Start Verification
+router.get("/kyc/digilocker/init", onboardingMiddleware, digilockerController.initiateDigiLocker);
+
+// Callback URL (Yeh URL DigiLocker Dashboard mein Whitelist hona chahiye)
+router.get("/kyc/digilocker/callback", digilockerController.handleCallback);
+
+module.exports = router;

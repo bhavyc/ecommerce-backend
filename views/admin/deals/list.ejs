@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Active 24-Hour Deals</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #d0f0c0, #a8e6cf);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    h2 {
+      text-align: center;
+      font-weight: 700;
+      color: #1b5e20;
+      margin-bottom: 40px;
+    }
+    .deal-list-item {
+      display: flex;
+      align-items: center;
+      background: #ffffffdd;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      padding: 15px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .deal-list-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .deal-img {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 15px;
+    }
+    .badge-featured {
+      background: #aed581;
+      color: #1b5e20;
+      padding: 3px 8px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-left: 5px;
+    }
+    .countdown {
+      font-weight: 600;
+      color: #d32f2f;
+    }
+    .btn-primary, .btn-secondary {
+      border-radius: 50px;
+      margin-right: 10px;
+    }
+  </style>
+  <script>
+    function startCountdown(endTime, elementId) {
+      function updateTimer() {
+        const now = new Date().getTime();
+        const distance = new Date(endTime).getTime() - now;
+
+        if (distance <= 0) {
+          document.getElementById(elementId).innerHTML = "Expired";
+          return;
+        }
+
+        const hours = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
+        const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+        const seconds = Math.floor((distance % (1000*60)) / 1000);
+
+        document.getElementById(elementId).innerHTML = hours + "h " + minutes + "m " + seconds + "s";
+      }
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+  </script>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2>🔥 Active 24-Hour Deals</h2>
+
+    <% if (deals.length === 0) { %>
+      <div class="alert alert-info text-center">No active 24-hour deals right now.</div>
+    <% } else { %>
+      <div class="list-group">
+        <% deals.forEach((deal, index) => { %>
+          <div class="deal-list-item">
+            <% if(deal.image){ %>
+              <img src="<%= deal.image %>" class="deal-img" alt="<%= deal.title %>">
+            <% } %>
+            <div>
+              <h5>
+                <%= deal.title %>
+                <% if(deal.featured){ %>
+                  <span class="badge-featured">🌟 Featured</span>
+                <% } %>
+              </h5>
+              <p class="mb-1"><%= deal.description %></p>
+              <p class="mb-1">
+                <strong>Price:</strong> ₹<%= deal.price.toFixed(2) %> | 
+                <strong>Discount:</strong> <%= deal.discount %>%
+              </p>
+              <p class="countdown" id="timer-<%= index %>"></p>
+            </div>
+          </div>
+          <script>
+         
+          </script>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="mt-4 text-center">
+      <a href="/admin/deals/create" class="btn btn-primary">+ New 24-Hour Deal</a>
+      <a href="/admin/drops" class="btn btn-secondary">Back to Drops</a>
+    </div>
+  </div>
+</body>
+</html>
