@@ -16,9 +16,9 @@ const getModelByType = (type) => {
 
 // 🛒 Add item to cart
 exports.addToCart = async (req, res) => {
-  console.log(req.body)
+  
   try {
-    console.log("added")
+    
     const { userId, itemId, itemType, quantity = 1 } = req.body;
     const Model = getModelByType(itemType);
     const itemData = await Model.findById(itemId);

@@ -88,9 +88,9 @@ exports.register = async (req, res) => {
 
     // If admins exist, require current user to be logged-in admin
     if (existingAdmin) {
-      console.log("Admin already exists");
+      
       if (!req.user || req.user.role !== "admin") {
-        console.log("User is not admin");
+        
         return res.send("Unauthorized");
       }
     }
@@ -104,7 +104,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Redirect to admin login
-    res.redirect("/api/admin/login");
+    res.redirect("/admin/login");
   } catch (err) {
     console.error("Admin Registration Error:", err);
     res.render("admin/register", { error: err.message });

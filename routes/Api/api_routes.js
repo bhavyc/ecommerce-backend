@@ -174,4 +174,24 @@ router.post("/auth/fcm-token", protect, authController.updateFcmToken);
 
 
 router.post("/orders/payment-failed", protect, orderController.markPaymentFailed);
+
+
+
+// User app se return mangne ke liye
+router.post("/order/request-return", protect, orderController.requestReturn);
+
+  
+router.post("/order/verify-delivery", orderController.verifyDeliveryOTP);
+
+
+router.post("/order/request-return", protect, orderController.requestReturn);
+
+// Public Link: Verify Return Pickup OTP (Delivery Boy hits this)
+router.post("/order/verify-pickup", orderController.verifyReturnOTP);
+ 
+router.post("/order/confirm-receipt", protect, orderController.confirmReceiptByCustomer);
+
+
+// Is line ko check karo, authMiddleware ke saath honi chahiye
+router.post("/order/return-handover", protect, orderController.confirmReturnHandover);
 module.exports = router;

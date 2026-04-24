@@ -1,40 +1,40 @@
 const Deal = require("../../models/24HrDeal");
 
-// 🟢 List all active deals
-exports.listActiveDeals = async (req, res) => {
-  try {
-    // Optional: If your model has an 'expiresAt' field, you should filter:
-    // const deals = await Deal.find({ expiresAt: { $gt: new Date() } }).sort({ createdAt: -1 });
+// // 🟢 List all active deals
+// exports.listActiveDeals = async (req, res) => {
+//   try {
+//     // Optional: If your model has an 'expiresAt' field, you should filter:
+//     // const deals = await Deal.find({ expiresAt: { $gt: new Date() } }).sort({ createdAt: -1 });
     
     
-    // Using current logic (fetching all)
-    const deals = await Deal.find().sort({ createdAt: -1 });
+//     // Using current logic (fetching all)
+//     const deals = await Deal.find().sort({ createdAt: -1 });
 
-    // Calculate discountedPrice for each deal
-    const dealsWithDiscount = deals.map(deal => {
-      const dealObj = deal.toObject(); // Convert Mongoose doc to plain JS object
+//     // Calculate discountedPrice for each deal
+//     const dealsWithDiscount = deals.map(deal => {
+//       const dealObj = deal.toObject(); // Convert Mongoose doc to plain JS object
       
-      const discountedPrice = deal.discount
-        ? deal.price - (deal.price * deal.discount) / 100
-        : deal.price;
+//       const discountedPrice = deal.discount
+//         ? deal.price - (deal.price * deal.discount) / 100
+//         : deal.price;
 
-      return { 
-        ...dealObj, 
-        discountedPrice: parseFloat(discountedPrice.toFixed(2)) // Format to 2 decimals
-      };
-    });
+//       return { 
+//         ...dealObj, 
+//         discountedPrice: parseFloat(discountedPrice.toFixed(2)) // Format to 2 decimals
+//       };
+//     });
 
-    res.status(200).json({
-      success: true,
-      count: dealsWithDiscount.length,
-      data: dealsWithDiscount
-    });
+//     res.status(200).json({
+//       success: true,
+//       count: dealsWithDiscount.length,
+//       data: dealsWithDiscount
+//     });
 
-  } catch (err) {
-    console.error("List Deals Error:", err);
-    res.status(500).json({ success: false, message: "Error fetching deals" });
-  }
-};
+//   } catch (err) {
+//     console.error("List Deals Error:", err);
+//     res.status(500).json({ success: false, message: "Error fetching deals" });
+//   }
+// };
 
 // 🔍 Get Single Deal Details
 exports.getDealById = async (req, res) => {
@@ -104,6 +104,7 @@ exports.claimDeal = async (req, res) => {
   }
 };
 // controllers/Api/dealControllerApi.js
+// controllers/Api/orderControllerApi.js ya jahan deals fetch hoti hain
 
 exports.listActiveDeals = async (req, res) => {
   try {
@@ -111,24 +112,30 @@ exports.listActiveDeals = async (req, res) => {
 
     const dealsWithDiscount = deals.map(deal => {
       const dealObj = deal.toObject();
-      const discountedPrice = deal.discount
-        ? deal.price - (deal.price * deal.discount) / 100
-        : deal.price;
-
+      
+      // ✅ 1. Standard Discounted Price calculate karo (Price - 10%)
+      // Example: 1000 - (1000 * 0.10) = 900
+      const standardDiscountedPrice = deal.price - (deal.price * (deal.discount / 100));
+      
       return { 
         ...dealObj, 
-        discountedPrice: parseFloat(discountedPrice.toFixed(2)) 
+        // 🔥 Is 'discountedPrice' ko hi Carousel, Detail aur Checkout har jagah use karna hai
+        discountedPrice: Math.round(standardDiscountedPrice), 
+        
+        // MRP/Original Price
+        originalPrice: deal.price, 
+        
+        // Group Buy Price (Agar user team bana kar khareede toh ₹850 wala case)
+        groupBuyPrice: deal.groupPrice ? Math.round(deal.groupPrice) : null 
       };
     });
 
     res.status(200).json({
       success: true,
-      count: dealsWithDiscount.length,
-      deals: dealsWithDiscount // ✅ "data" ko badal kar "deals" kar diya
+      deals: dealsWithDiscount // Frontend ko ab "deals" array milega
     });
-
   } catch (err) {
-    console.error("List Deals Error:", err);
-    res.status(500).json({ success: false, message: "Error fetching deals" });
+    console.error("Deal List Error:", err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

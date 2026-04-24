@@ -9,11 +9,11 @@ const SlotBooking = require("../models/SlotBooking");
 // ==========================================
 const generateDailyDrop = async () => {
   try {
+    // 🔥 FIX: Purane drops ko delete nahi karenge, sirf unka featured status false karenge
+    // Isse checkout karne wale users ko error nahi aayega
+    await Drop.updateMany({ featured: true }, { $set: { featured: false } }); 
 
-    // Purane drops delete karo taaki list fresh ho
-    await Drop.deleteMany({}); 
-
-    // ✅ NEW LOGIC: Find ALL Paid & Unprocessed Drop Slots
+    // ✅ Naya Drop logic (Paid Slots check)
     const paidSlots = await SlotBooking.find({
       type: "DROP",
       status: "PAID",
@@ -23,7 +23,6 @@ const generateDailyDrop = async () => {
     console.log(`Found ${paidSlots.length} paid DROP slots.`);
 
     if (paidSlots.length > 0) {
-        // Sabko Drop bana do
         for (const slot of paidSlots) {
             if (slot.product) {
                 await Drop.create({
@@ -33,24 +32,20 @@ const generateDailyDrop = async () => {
                     description: slot.product.description,
                     image: slot.product.image,
                     price: slot.product.price,
-                    discount: slot.discount, // Seller ka discount
-                    featured: true
+                    discount: slot.discount,
+                    featured: true // Sirf naya wala featured rahega
                 });
 
-                // Mark processed taaki kal dobara na aaye
                 slot.isProcessed = true;
                 await slot.save();
             }
         }
     } else {
-        //Fallback: Agar koi paid slot nahi hai, toh 1 Random Product dikha do
-        //Taaki section khali na lage
+        // Fallback: Agar paid slot nahi hai toh 1 Random product ko Featured Drop banao
         const count = await Product.countDocuments();
         if (count > 0) {
-          
             const random = Math.floor(Math.random() * count);
             const prod = await Product.findOne().skip(random);
-            
             if(prod) {
                 await Drop.create({
                     product: prod._id,
@@ -59,14 +54,18 @@ const generateDailyDrop = async () => {
                     description: prod.description,
                     image: prod.image,
                     price: prod.price,
-                    discount: 50, // System generated attraction
+                    discount: 50,
                     featured: true
                 });
             }
         }
     }
-    console.log("Daily Drops Generated.");
+    
+    // 🔥 DB Cleanup: 48 ghante se purane drops ko delete kar do (DB saaf rakhne ke liye)
+    const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    await Drop.deleteMany({ featured: false, createdAt: { $lt: twoDaysAgo } });
 
+    console.log("Daily Drops Processed.");
   } catch (err) {
     console.error("Daily Drop Error:", err);
   }

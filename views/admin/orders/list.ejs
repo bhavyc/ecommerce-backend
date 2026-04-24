@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Orders - Admin</title>
+  <title>Master Orders - Multi-Vendor Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -16,17 +16,20 @@
     .table-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     .table thead { background-color: #e8f5e9; color: #1b5e20; border-bottom: 2px solid #2e7d32; }
     
-    .filter-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .filter-label { font-size: 12px; color: #2e7d32; font-weight: 700; margin-bottom: 6px; display: inline-block; }
-
-    /* Status Badges */
-    .st-pending { background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
-    .st-paid { background: #d1e7dd; color: #0f5132; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
-    .st-cancelled { background: #f8d7da; color: #842029; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    /* Vendor Block Styling */
+    .vendor-block { background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 8px; border-left: 5px solid #2e7d32; transition: 0.2s; }
+    .vendor-block:hover { border-color: #2e7d32; background: #fff; }
     
-    .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-    .page-link { color: #1b5e20; font-weight: 600; }
-    .page-item.active .page-link { background-color: #1b5e20; border-color: #1b5e20; color: white; }
+    .st-badge { padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .st-pending { background: #fff3cd; color: #856404; }
+    .st-shipped { background: #cfe2ff; color: #084298; }
+    .st-delivered { background: #d1e7dd; color: #0f5132; }
+    .st-cancelled { background: #f8d7da; color: #842029; }
+
+    .btn-xs { padding: 2px 8px; font-size: 10px; font-weight: bold; }
+    .proof-img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 1px solid #ddd; }
+    .pagination .page-link { color: #1b5e20; border-radius: 5px; margin: 0 2px; }
+    .pagination .page-item.active .page-link { background: #1b5e20; border-color: #1b5e20; }
   </style>
 </head>
 <body>
@@ -42,54 +45,45 @@
 
 <div id="main-content">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-success fw-bold">User Orders</h2>
-    <button onclick="loadOrders(1)" class="btn btn-success shadow-sm"><i class="fas fa-sync"></i> Refresh</button>
+    <h2 class="text-success fw-bold">Multi-Vendor Management</h2>
+    <button onclick="loadOrders(1)" class="btn btn-outline-success"><i class="fas fa-sync"></i> Refresh</button>
   </div>
 
   <!-- Filters -->
-  <div class="filter-card">
-    <div class="row g-3">
-      <div class="col-md-4">
-        <span class="filter-label">Search Order</span>
-        <input id="searchInput" type="text" class="form-control" placeholder="User Name, Email or Order ID..." onkeyup="if(event.key === 'Enter') applyFilters()">
-      </div>
-      <div class="col-md-2">
-        <span class="filter-label">From Date</span>
-        <input id="fromDate" type="date" class="form-control"/>
-      </div>
-      <div class="col-md-2">
-        <span class="filter-label">To Date</span>
-        <input id="toDate" type="date" class="form-control"/>
-      </div>
-      <div class="col-md-4 d-flex align-items-end gap-2">
-        <button class="btn btn-success flex-grow-1 fw-bold" onclick="applyFilters()">Apply</button>
-        <button class="btn btn-outline-secondary flex-grow-1 fw-bold" onclick="clearFilters()">Clear</button>
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <input id="searchInput" type="text" class="form-control" placeholder="Search Customer, Email or ID..." onkeyup="if(event.key === 'Enter') applyFilters()">
+        </div>
+        <div class="col-md-2"><input id="fromDate" type="date" class="form-control"/></div>
+        <div class="col-md-2"><input id="toDate" type="date" class="form-control"/></div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-success w-100 fw-bold" onclick="applyFilters()">Apply</button>
+          <button class="btn btn-light border" onclick="clearFilters()"><i class="fas fa-redo"></i></button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Orders Table -->
   <div class="table-card">
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead>
           <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Amount</th>
-            <th>Method</th>
-            <th>Payment</th>
-            <th>Status</th>
-            <th>Date</th>
+            <th width="120">Order ID</th>
+            <th width="180">Customer Details</th>
+            <th>Seller Items & Status</th>
+            <th width="150" class="text-center">Global Order</th>
           </tr>
         </thead>
         <tbody id="orderTableBody"></tbody>
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination-wrapper">
-      <div id="paginationInfo" class="small text-muted">Showing 0 orders</div>
+    <!-- 🔥 PAGINATION RESTORED & IMPROVED -->
+    <div class="pagination-wrapper d-flex justify-content-between align-items-center mt-4">
+      <div id="paginationInfo" class="small text-muted font-monospace"></div>
       <nav><ul class="pagination pagination-sm mb-0" id="paginationButtons"></ul></nav>
     </div>
   </div>
@@ -97,7 +91,6 @@
 
 <script>
   let currentPage = 1;
-
   document.addEventListener("DOMContentLoaded", () => loadOrders(1));
 
   function applyFilters() { currentPage = 1; loadOrders(1); }
@@ -109,14 +102,14 @@
   }
 
   async function loadOrders(page) {
+    currentPage = page;
     const from = document.getElementById("fromDate").value;
     const to = document.getElementById("toDate").value;
     const search = document.getElementById("searchInput").value;
+    const tbody = document.getElementById("orderTableBody");
 
     try {
-      const tbody = document.getElementById("orderTableBody");
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5">Loading...</td></tr>`;
-
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-success"></div></td></tr>`;
       const params = new URLSearchParams({ page, limit: 10, from, to, search });
       const res = await fetch(`/admin/orders/data?${params.toString()}`);
       const data = await res.json();
@@ -124,35 +117,98 @@
       tbody.innerHTML = "";
       if (data.success && data.orders.length > 0) {
         data.orders.forEach(order => {
-          const statusClass = order.orderStatus === 'Cancelled' ? 'st-cancelled' : 'st-pending';
-          const payClass = order.paymentStatus === 'PAID' ? 'st-paid' : 'st-pending';
-          
+          // --- Multi-Vendor Logic: Group by Seller ---
+          const vendors = {};
+          order.items.forEach(item => {
+            const sellerId = item.seller?._id || item.seller;
+            const sellerName = item.seller?.businessName || item.seller?.name || `Seller ID: ${sellerId.toString().slice(-6)}`;
+            
+            if(!vendors[sellerId]) {
+              vendors[sellerId] = { name: sellerName, items: [], status: item.status, logistics: item.deliveryDetails };
+            }
+            vendors[sellerId].items.push(item);
+          });
+
+          let vendorHtml = "";
+          Object.keys(vendors).forEach(sId => {
+            const v = vendors[sId];
+            const itemsString = v.items.map(i => `${i.title} (x${i.quantity})`).join(", ");
+            let statusClass = 'st-pending';
+            if(v.status === 'Shipped') statusClass = 'st-shipped';
+            if(v.status === 'Delivered') statusClass = 'st-delivered';
+            if(v.status === 'Cancelled' || v.status === 'Returned') statusClass = 'st-cancelled';
+
+            vendorHtml += `
+              <div class="vendor-block d-flex justify-content-between align-items-center">
+                <div style="flex: 1;">
+                   <div class="fw-bold text-success">${v.name}</div>
+                   <div class="small text-muted" style="font-size:11px;">${itemsString}</div>
+                   <div class="mt-2">
+                      <span class="st-badge ${statusClass}">${v.status}</span>
+                      <small class="ms-2 text-muted" style="font-size:10px;">${v.logistics?.method || 'Method: N/A'}</small>
+                   </div>
+                </div>
+                <div class="px-3">
+                   ${v.logistics?.dispatchProof ? `<a href="${v.logistics.dispatchProof}" target="_blank"><img src="${v.logistics.dispatchProof}" class="proof-img"></a>` : '<span class="text-muted" style="font-size:10px;">No Proof</span>'}
+                </div>
+                <div class="d-flex flex-column gap-1">
+                   <button class="btn btn-xs btn-success" onclick="adminForceAction('${order._id}', '${sId}', 'deliver')">Force Deliver</button>
+                   <button class="btn btn-xs btn-danger" onclick="adminForceAction('${order._id}', '${sId}', 'refund')">Force Refund</button>
+                </div>
+              </div>`;
+          });
+
           tbody.innerHTML += `
             <tr>
-              <td><small class="fw-bold">#${order._id.toString().slice(-6).toUpperCase()}</small></td>
-              <td><strong>${order.user?.name || 'N/A'}</strong><br><span class="small text-muted">${order.user?.email || ''}</span></td>
-              <td class="fw-bold text-success">₹${order.totalAmount}</td>
-              <td><span class="badge bg-light text-dark border">${order.paymentMethod}</span></td>
-              <td><span class="${payClass}">${order.paymentStatus}</span></td>
-              <td><span class="${statusClass}">${order.orderStatus}</span></td>
-              <td class="small">${new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+              <td>
+                <div class="fw-bold">#${order._id.toString().slice(-6).toUpperCase()}</div>
+                <div class="small text-muted">${new Date(order.createdAt).toLocaleDateString('en-GB')}</div>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">${order.user?.name || 'Guest'}</div>
+                <div class="small text-muted">${order.user?.email || ''}</div>
+              </td>
+              <td>${vendorHtml}</td>
+              <td class="text-center">
+                <div class="fw-bold text-success">₹${order.totalAmount}</div>
+                <div class="small badge bg-light text-dark border mb-1">${order.orderStatus}</div><br>
+                <small class="text-muted" style="font-size:9px;">Pay: ${order.paymentStatus}</small>
+              </td>
             </tr>`;
         });
         renderPagination(data.pagination);
       } else {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No orders found.</td></tr>`;
-        document.getElementById("paginationButtons").innerHTML = "";
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5">No orders found.</td></tr>`;
       }
     } catch (err) { console.error(err); }
   }
 
+  async function adminForceAction(orderId, sellerId, type) {
+    const actionName = type === 'deliver' ? "FORCE DELIVER" : "FORCE REFUND";
+    if(!confirm(`Are you sure you want to ${actionName} for this specific Seller?`)) return;
+    const url = type === 'deliver' ? '/admin/orders/force-deliver' : '/admin/orders/force-refund';
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, sellerId })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if(data.success) loadOrders(currentPage);
+    } catch (e) { alert("Action Failed"); }
+  }
+
+  // 🔥 RESTORED FULL PAGINATION LOGIC
   function renderPagination(pg) {
     const container = document.getElementById("paginationButtons");
-    document.getElementById("paginationInfo").innerText = `Page ${pg.currentPage} of ${pg.totalPages} (${pg.totalCount} total)`;
+    document.getElementById("paginationInfo").innerText = `Showing ${((pg.currentPage-1)*10)+1} to ${Math.min(pg.currentPage*10, pg.totalCount)} of ${pg.totalCount}`;
     
     let html = "";
+    // Prev Button
     html += `<li class="page-item ${pg.currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadOrders(${pg.currentPage - 1})">Prev</a></li>`;
     
+    // Page Numbers
     for(let i=1; i <= pg.totalPages; i++) {
         if(i === 1 || i === pg.totalPages || (i >= pg.currentPage - 1 && i <= pg.currentPage + 1)) {
             html += `<li class="page-item ${i === pg.currentPage ? 'active' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadOrders(${i})">${i}</a></li>`;
@@ -160,7 +216,8 @@
             html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
         }
     }
-
+    
+    // Next Button
     html += `<li class="page-item ${pg.currentPage === pg.totalPages ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadOrders(${pg.currentPage + 1})">Next</a></li>`;
     container.innerHTML = html;
   }

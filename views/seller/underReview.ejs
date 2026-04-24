@@ -2,183 +2,185 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Under Review | Seller Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Review | Seller Panel</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
   <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg-body: #f3f4f6;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+    }
+
     body {
-      font-family: 'Poppins', sans-serif;
-      background: #f4f6f8;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-    } 
-              
-    .container {
-      background: #fff;
+      padding: 20px;
+    }
+
+    .review-card {
+      background: white;
       padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      max-width: 500px;
+      width: 100%;
       text-align: center;
-      max-width: 480px;
-      width: 90%;
+      border: 1px solid #e5e7eb;
+    }
+
+    .icon-container {
+      width: 80px;
+      height: 80px;
+      background: #ecfdf5;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 25px;
+      font-size: 40px;
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .status-tag {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
     }
 
     h1 {
-      color: #333;
-      margin-bottom: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
       font-size: 24px;
+      color: var(--text-main);
+      margin-bottom: 15px;
     }
 
     p {
-      color: #666;
-      font-size: 15px;
+      color: var(--text-muted);
       line-height: 1.6;
-      margin-bottom: 20px;
+      font-size: 15px;
+      margin-bottom: 30px;
     }
 
-    .icon {
-      font-size: 50px;
-      margin-bottom: 20px;
-      display: inline-block;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-
-    /* --- DigiLocker Section Styles --- */
-    .kyc-box {
-      background: #e3f2fd;
-      border: 1px solid #bbdefb;
-      border-radius: 10px;
+    .info-list {
+      background: #f9fafb;
+      border-radius: 12px;
       padding: 20px;
-      margin-top: 25px;
       text-align: left;
+      border: 1px dashed #d1d5db;
+      margin-bottom: 30px;
     }
 
-    .kyc-title {
-      color: #0d47a1;
-      font-weight: 600;
-      font-size: 16px;
+    .info-list-item {
       display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .info-list-item:last-child { margin-bottom: 0; }
+    .info-list-item i { color: var(--primary); font-size: 18px; margin-top: 2px; }
+
+    .btn-logout {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .digilocker-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #1976d2; /* DigiLocker Blue */
-      color: #fff;
+      color: #ef4444;
       text-decoration: none;
-      border-radius: 8px;
       font-weight: 600;
-      box-shadow: 0 4px 6px rgba(25, 118, 210, 0.2);
-      transition: 0.3s;
-      border: none;
-      cursor: pointer;
-    }
-
-    .digilocker-btn:hover {
-      background-color: #1565c0;
-      transform: translateY(-2px);
-    }
-
-    /* --- Verified Success Style --- */
-    .verified-box {
-      background: #e8f5e9;
-      border: 1px solid #c8e6c9;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 25px;
-      color: #2e7d32;
-    }
-
-    .verified-badge {
-      font-weight: bold;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 5px;
-    }
-
-    /* --- Standard Links --- */
-    .back-link {
-      display: inline-block;
-      margin-top: 25px;
-      color: #777;
-      text-decoration: none;
       font-size: 14px;
-      border-bottom: 1px solid transparent;
-      transition: 0.3s;
+      transition: 0.2s;
+      padding: 10px 20px;
+      border-radius: 8px;
     }
-       
-    .back-link:hover {
-      color: #333;
-      border-bottom: 1px solid #333;
+
+    .btn-logout:hover {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .support-text {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 480px) {
+      .review-card { padding: 30px 20px; }
+      h1 { font-size: 20px; }
+      p { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <div class="review-card">
     
-    <!-- Status Icon -->
-    <div class="icon">⏳</div>
+    <!-- Pulsing Icon -->
+    <div class="icon-container">
+      <i class='bx bx-time-five'></i>
+    </div>
+    
+    <div class="status-tag">Verification Pending</div>
     
     <h1>Account Under Review</h1>
     
     <p>
-      Thank you for registering! Your application has been received and is currently being reviewed by our admin team.
+      Thank you for registering as a seller! Our compliance team is currently verifying your profile and business documents.
     </p>
 
-    <!-- DIGILOCKER SECTION START -->
-    <% if (typeof profile !== 'undefined' && profile.digiLockerData && profile.digiLockerData.isAadhaarVerified) { %>
-      
-      <!-- CASE 1: Aadhaar Already Verified -->
-      <div class="verified-box">
-        <div class="verified-badge">
-          ✅ Identity Verified
-        </div>
-        <div style="font-size: 14px;">
-          <strong>Name:</strong> <%= profile.digiLockerData.aadhaarName %>
-        </div>
-        <small style="opacity: 0.8;">Verified via DigiLocker</small>
+    <div class="info-list">
+      <div class="info-list-item">
+        <i class='bx bx-check-double'></i>
+        <span>Standard review takes <strong>24-48 business hours</strong>.</span>
       </div>
-      <p style="margin-top: 15px; font-size: 13px;">
-        Sit tight! We will verify your business documents shortly.
-      </p>
-
-    <% } else { %>
-      
-      <!-- CASE 2: Not Verified Yet -->
-      <div class="kyc-box">
-        <div class="kyc-title">
-          ⚡ Speed Up Your Approval
-        </div>
-        <p style="margin: 8px 0 0; font-size: 13px; color: #444;">
-          Verify your Aadhaar instantly using DigiLocker. Verified profiles get approved 2x faster.
-        </p>
-        
-        <a href="/seller/kyc/digilocker/init" class="digilocker-btn">
-          Verify via DigiLocker
-        </a>
+      <div class="info-list-item">
+        <i class='bx bx-check-double'></i>
+        <span>We are verifying your GST, PAN, and Bank details.</span>
       </div>
+      <div class="info-list-item">
+        <i class='bx bx-check-double'></i>
+        <span>You'll get an email as soon as your account is active.</span>
+      </div>
+    </div>
 
-    <% } %>
-    <!-- DIGILOCKER SECTION END -->
+    <a href="/seller/auth/logout" class="btn-logout">
+      <i class='bx bx-log-out'></i> Logout & Check Later
+    </a>
 
-    <br>
-    <a href="/seller/auth/logout" class="back-link">Log out & Check Later</a>
+    <!-- <div class="support-text">
+      Questions? Reach out to <a href="mailto:support@bharatmart.com" class="text-decoration-none text-success fw-bold">support@bharatmart.com</a>
+    </div> -->
+
   </div>
+
 </body>
 </html>

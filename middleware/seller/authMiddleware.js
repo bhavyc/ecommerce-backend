@@ -26,7 +26,7 @@ const authMiddleware = async (req,res,next) => {
 // ---------------- SELLER-ONLY MIDDLEWARE ----------------
 const sellerMiddleware = (req, res, next) => {
   if (!req.user || req.user.role !== "seller") {
-    console.log("🚫 Seller access denied");
+    
     return res.status(403).json({ message: "Access denied: Seller only" });
   }
   next();

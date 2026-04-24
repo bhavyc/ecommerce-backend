@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { authMiddleware, sellerMiddleware } = require("../../middleware/seller/authMiddleware");
 const ctrl = require("../../controllers/seller/onboardingController");
-
+const { storage } = require("../../config/cloudinary");
 // Multer for uploads
 const multer = require("multer");
 const path = require("path");

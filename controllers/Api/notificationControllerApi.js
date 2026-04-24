@@ -22,7 +22,7 @@ exports.getNotifications = async (req, res) => {
 exports.markAsRead = async (req, res) => {
   try {
     const userId = req.user?._id || req.user?.id || req.user?.userId;
-console.log("REQ.USER =>", req.user);
+
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized: user id missing" });

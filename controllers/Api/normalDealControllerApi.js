@@ -33,7 +33,7 @@ exports.getAllDeals = async (req, res) => {
   }
 };
 
-// 🟢 GET FEATURED DEALS
+//  GET FEATURED DEALS
 exports.getFeaturedDeals = async (req, res) => {
   try {
     const featuredDeals = await NormalDeal.find({ featured: true })
@@ -48,7 +48,7 @@ exports.getFeaturedDeals = async (req, res) => {
   }
 };
 
-// 🔍 GET SINGLE DEAL DETAILS (Heavy data with Q&A)
+//  GET SINGLE DEAL DETAILS (Heavy data with Q&A)
 // This replaces the logic that was inside 'renderDealsPage' for deep population
 exports.getDealById = async (req, res) => {
   try {
@@ -93,7 +93,7 @@ exports.getDealById = async (req, res) => {
   }
 };
 
-// 🛡️ CREATE DEAL FROM INVENTORY (Admin Only)
+// CREATE DEAL FROM INVENTORY (Admin Only)
 exports.createDealFromInventory = async (req, res) => {
   const { inventoryId } = req.body;
   
@@ -156,7 +156,7 @@ exports.getAllDeals = async (req, res) => {
       .limit(limit);
 
     const processedDeals = deals.map(deal => {
-      // ✅ FORCE DISCOUNT TO 0 FOR NORMAL DEALS
+      // FORCE DISCOUNT TO 0 FOR NORMAL DEALS
       // Kyunki user ki demand hai ki discount sirf slots (Drops/24Hr) par ho.
       const forcedDiscount = 0; 
       

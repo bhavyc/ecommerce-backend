@@ -4,53 +4,87 @@ const SlotBooking = require("../../models/SlotBooking"); // 🔥 Naya Model Impo
 
 exports.renderEarningPage = async (req, res) => {
     try {
-        // 1. Orders Stats (Commission + Delivery)
+        // 1. Orders Stats (Multi-vendor and Discount Aware)
         const orderStats = await Order.aggregate([
             { $match: { paymentStatus: "PAID" } },
+            { $unwind: "$items" }, // Har item ko alag karo taaki item-level calculation ho sake
             {
                 $group: {
                     _id: null,
-                    totalCommission: { $sum: { $multiply: ["$subtotal", 0.10] } },
-                    totalDelivery: { $sum: "$deliveryFee" },
-                    totalOrders: { $sum: 1 }
+                    // 🔥 FIX: Pehle "Effective Price" nikaalo aggregation ke andar
+                    // Formula: (Price - (Price * Discount / 100)) * Quantity * 0.10
+                    totalCommission: { 
+                        $sum: { 
+                            $multiply: [
+                                { 
+                                    $multiply: [
+                                        { 
+                                            $subtract: [ 
+                                                "$items.price", 
+                                                { $multiply: ["$items.price", { $divide: ["$items.discount", 100] }] } 
+                                            ] 
+                                        }, 
+                                        "$items.quantity" 
+                                    ] 
+                                }, 
+                                0.10 
+                            ] 
+                        } 
+                    },
+                    totalOrders: { $addToSet: "$_id" } // Unique Order IDs count karne ke liye
+                }
+            },
+            {
+                $project: {
+                    totalCommission: 1,
+                    totalOrdersCount: { $size: "$totalOrders" }
                 }
             }
         ]);
 
-        // 2. Slot Booking Stats (Drops/Deals fees)
+        // 2. Slot Booking Stats (Drops/Deals fees) - No changes here
         const slotStats = await SlotBooking.aggregate([
             { $match: { status: "PAID" } },
             { $group: { _id: null, totalSlotRevenue: { $sum: "$amountPaid" } } }
         ]);
 
-        // 3. Referral Expenses (Kharcha)
+        // 3. Referral Expenses (Kharcha) - No changes here
         const referralExpense = await Transaction.aggregate([
             { $match: { description: { $regex: "Referral Bonus", $options: "i" }, status: "SUCCESS" } },
             { $group: { _id: null, total: { $sum: "$amount" } } }
         ]);
 
-        const stats = orderStats[0] || { totalCommission: 0, totalDelivery: 0, totalOrders: 0 };
+        const stats = orderStats[0] || { totalCommission: 0, totalOrdersCount: 0 };
         const slotRevenue = slotStats[0]?.totalSlotRevenue || 0;
         const totalExpense = referralExpense[0]?.total || 0;
 
-        // 🔥 ASLI CALCULATION
-        // Total Kamayi = Commission + Delivery + Slots
-        // Net Profit = Total Kamayi - Referral Expense
-        const totalGross = stats.totalCommission + stats.totalDelivery + slotRevenue;
+        // Total Gross = Commission (from all sellers on discounted price) + Slot Revenue
+        const totalGross = stats.totalCommission + slotRevenue;
         const netProfit = totalGross - totalExpense;
+
+        // Escrow Balance (Jo paisa abhi sellers ko milna baki hai)
+        const escrowStats = await Transaction.aggregate([
+            { $match: { status: "ON_HOLD", type: "CREDIT" } },
+            { $group: { _id: null, totalHold: { $sum: "$amount" } } }
+        ]);
+
+        const escrowBalance = escrowStats[0]?.totalHold || 0;
 
         res.render("admin/earnings/view", { 
             user: req.user,
-            stats,
+            stats: {
+                totalCommission: stats.totalCommission,
+                totalOrders: stats.totalOrdersCount
+            },
             slotRevenue,
             totalExpense,
-            netProfit
+            netProfit,
+            escrowBalance
         });
     } catch (err) {
         res.status(500).send(err.message);
     }
 };
-
 
 // controllers/admin/adminEarningController.js
 
@@ -107,3 +141,6 @@ exports.getEarningData = async (req, res) => {
         res.status(500).json({ success: false });
     }
 };
+
+
+

@@ -1,77 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Book a Slot</title>
-    <!-- Razorpay Script Zaroori Hai -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <style>
-        .container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; }
-        .btn { background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; }
-        .error { color: red; font-size: 0.9em; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Slot | Seller Panel</title>
+  
+  <!-- Scripts & CSS -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root { 
+        --primary: #10b981; 
+        --primary-dark: #059669;
+        --bg-body: #f3f4f6; 
+        --sidebar-width: 260px; 
+    }
+    
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; }
+    
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-width); background: #1f2937; color: #fff; position: fixed; height: 100vh; padding-top: 20px; transition: 0.3s; z-index: 1000; }
+    .nav-item { display: flex; align-items: center; padding: 12px 20px; color: #d1d5db; text-decoration: none; transition: 0.3s; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item i { margin-right: 12px; font-size: 20px; }
+
+    /* Layout */
+    .main-content { margin-left: var(--sidebar-width); padding: 40px; transition: 0.3s; }
+    .mobile-header { display: none; background: #fff; padding: 15px 20px; border-bottom: 1px solid #e5e7eb; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 900; }
+
+    /* Booking Card */
+    .booking-card { background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+    .info-bar { background: #f8fafc; border-bottom: 1px solid #edf2f7; padding: 15px 25px; }
+    .form-container { padding: 30px; }
+
+    /* Custom UI */
+    .stat-badge { background: #e0f2fe; color: #0369a1; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 10px; }
+    .price-tag { font-size: 24px; font-weight: 800; color: #1f2937; }
+    .discount-hint { font-size: 12px; color: #6b7280; margin-top: 5px; }
+
+    .btn-pay {
+        background: var(--primary); color: white; border: none; padding: 16px;
+        font-weight: 700; border-radius: 12px; width: 100%; transition: 0.3s;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-pay:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .btn-pay:disabled { background: #9ca3af; transform: none; }
+
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+
+    @media (max-width: 991.98px) {
+        .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
+        .sidebar.active { margin-left: 0; }
+        .main-content { margin-left: 0; padding: 20px; }
+        .mobile-header { display: flex; }
+        .sidebar-overlay.active { display: block; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h2> Boost Your Sales via Slots</h2>
-    
-    <!-- Status Show Karo -->
-    <p>Daily Limits: Drops (<%= used.drop %>/<%= limits.drop %>) | Deals (<%= used.deal %>/<%= limits.deal %>)</p>
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <header class="mobile-header">
+    <h4 class="text-success fw-bold mb-0">SellerPanel</h4>
+    <button class="btn btn-dark" onclick="toggleSidebar()"><i class='bx bx-menu-alt-left fs-3'></i></button>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="px-4 mb-4 d-flex justify-content-between align-items-center">
+        <h4 class="text-success fw-bold mb-0">SellerPanel</h4>
+        <button class="btn text-white d-lg-none" onclick="toggleSidebar()"><i class='bx bx-x fs-3'></i></button>
+    </div>
+    <nav>
+      <a href="/seller/dashboard" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="/seller/slots/history" class="nav-item active"><i class='bx bxs-time-five'></i> Slot History</a>
+      <a href="/seller/inventory" class="nav-item"><i class='bx bxs-box'></i> Inventory</a>
+      <a href="/seller/wallet" class="nav-item"><i class='bx bxs-wallet'></i> Wallet</a>
+      <a href="/seller/auth/logout" class="nav-item text-danger mt-5"><i class='bx bx-log-out'></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="mb-4">
+        <h2 class="fw-bold">🚀 Boost Your Sales</h2>
+        <p class="text-muted">Book a promotional slot to feature your products prominently.</p>
+    </div>
+
+    <!-- Status Section -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="stat-badge"><i class='bx bxs-zap'></i> Drops: <%= used.drop %>/<%= limits.drop %> Used</span>
+        <span class="stat-badge"><i class='bx bxs-purchase-tag'></i> Deals: <%= used.deal %>/<%= limits.deal %> Used</span>
+    </div>
+
     <% if(isCooldownActive) { %>
-        <p style="color:red;"> Cooldown Active! Wait <%= daysLeft %> days.</p>
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
+            <i class='bx bxs-error-circle fs-4 me-2'></i>
+            <div><strong>Cooldown Active!</strong> You can book again in <%= daysLeft %> days.</div>
+        </div>
     <% } %>
 
-    <div id="bookingForm">
-        <!-- 1. Product Select -->
-        <div class="form-group">
-            <label>Select Product</label>
-            <select id="productId">
-                <% products.forEach(p => { %>
-                    <option value="<%= p._id %>"><%= p.title %> (<%= p.price %>)</option>
-                <% }) %>
-            </select>
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="booking-card shadow-sm">
+                <div class="info-bar">
+                    <span class="fw-bold text-uppercase small text-muted">Slot Details</span>
+                </div>
+                
+                <div class="form-container">
+                    <!-- 1. Product -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Product</label>
+                        <select class="form-select form-select-lg" id="productId">
+                            <% products.forEach(p => { %>
+                                <option value="<%= p._id %>"><%= p.title %> (₹<%= p.price %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <!-- 2. Slot Type -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Slot Type</label>
+                        <select class="form-select form-select-lg" id="slotType" onchange="updatePrice()">
+                            <option value="DROP">15 Min Drop (High Traffic) - ₹500</option>
+                            <option value="DEAL">24 Hr Deal (Long Term) - ₹200</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. Discount -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Discount Percentage (%)</label>
+                        <div class="input-group input-group-lg">
+                            <input type="number" id="discount" class="form-control" placeholder="e.g. 40" min="1" max="99">
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div id="discountHint" class="discount-hint">Min 40% required for Drops</div>
+                    </div>
+
+                    <!-- Payment Summary (Desktop/Mobile Footer Style) -->
+                    <div class="p-4 bg-light rounded-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted fw-medium">Total Amount:</span>
+                            <span class="price-tag" id="priceDisplay">₹500</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-pay" onclick="initiateBooking()" <%= isCooldownActive ? 'disabled' : '' %>>
+                        <i class='bx bxs-lock-alt'></i> Pay & Book Now
+                    </button>
+                    <p id="msg" class="text-danger mt-3 small fw-bold text-center"></p>
+                </div>
+            </div>
         </div>
 
-        <!-- 2. Slot Type Select -->
-        <div class="form-group">
-            <label>Slot Type</label>
-            <select id="slotType" onchange="updatePrice()">
-                <option value="DROP">15 Min Drop (High Traffic) -   500</option>
-                <option value="DEAL">24 Hr Deal (Long Term) - 200</option>
-            </select>
+        <!-- Sidebar Info (Desktop Only) -->
+        <div class="col-lg-5 d-none d-lg-block">
+            <div class="card border-0 bg-transparent">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Why book a slot?</h5>
+                    <div class="d-flex mb-3">
+                        <i class='bx bxs-check-circle text-success fs-4 me-3'></i>
+                        <p class="small text-muted"><strong>Drops</strong> get 10x more traffic by appearing at the top of the homepage for a limited time.</p>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class='bx bxs-check-circle text-success fs-4 me-3'></i>
+                        <p class="small text-muted"><strong>Deals</strong> stay active for 24 hours, perfect for consistent daily sales.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- 3. DISCOUNT INPUT (Yahan Seller Discount Dega) -->
-        <div class="form-group">
-            <label>Discount Percentage (%)</label>
-            <input type="number" id="discount" placeholder="e.g. 40" min="1" max="99">
-            <small id="discountHint" style="color: #666;">Min 40% required for Drops</small>
-        </div>
-
-        <h3 id="priceDisplay">Payable: 500</h3>
-
-        <button class="btn" onclick="initiateBooking()" <%= isCooldownActive ? 'disabled' : '' %>>
-            Pay & Book Slot
-        </button>
-        <p id="msg" class="error"></p>
     </div>
-</div>
+  </main>
 
-<script>
-    // UI Update Logic
+  <script>
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("active");
+        document.getElementById("overlay").classList.toggle("active");
+    }
+
     function updatePrice() {
         const type = document.getElementById("slotType").value;
         const price = type === "DROP" ? 500 : 200;
         const hint = type === "DROP" ? "Min 40% required for Drops" : "Min 10% required for Deals";
         
-        document.getElementById("priceDisplay").innerText = `Payable: ${price}`;
+        document.getElementById("priceDisplay").innerText = `₹${price}`;
         document.getElementById("discountHint").innerText = hint;
     }
 
-    // MAIN PAYMENT FUNCTION
     async function initiateBooking() {
         const productId = document.getElementById("productId").value;
         const type = document.getElementById("slotType").value;
@@ -80,13 +197,11 @@
 
         msg.innerText = "";
 
-        // Frontend Validation
-        if (!discount) return msg.innerText = "Please enter discount";
+        if (!discount) return msg.innerText = "Please enter discount percentage";
         if (type === "DROP" && discount < 40) return msg.innerText = "Minimum 40% discount needed for Drops!";
         if (type === "DEAL" && discount < 10) return msg.innerText = "Minimum 10% discount needed for Deals!";
 
         try {
-            // Step 1: Backend se Order ID maango
             const res = await fetch("/seller/buy-slot/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -94,32 +209,26 @@
             });
 
             const data = await res.json();
+            if (!data.success) return msg.innerText = data.msg || "Error creating order";
 
-            if (!data.success) {
-                return msg.innerText = data.msg || "Error creating order";
-            }
-
-            // Step 2: Razorpay Popup Open karo
             const options = {
-                "key": "<%= razorpayKey %>", // Controller se aayega
+                "key": "<%= razorpayKey %>",
                 "amount": data.order.amount,
                 "currency": "INR",
-                "name": "Your App Name",
-                "description": `Slot Booking for ${type}`,
-                "order_id": data.order.id, // Backend se mila order ID
+                "name": "Seller Panel",
+                "description": `Slot Booking: ${type}`,
+                "order_id": data.order.id,
                 "handler": async function (response) {
-                    // Step 3: Payment Success hone par Backend ko batao
                     await verifyPayment(response, data.bookingId, discount);
                 },
-                "theme": { "color": "#3399cc" }
+                "theme": { "color": "#10b981" }
             };
 
             const rzp1 = new Razorpay(options);
             rzp1.open();
 
         } catch (err) {
-            console.error(err);
-            msg.innerText = "Something went wrong";
+            msg.innerText = "Something went wrong. Please try again.";
         }
     }
 
@@ -139,16 +248,15 @@
 
             const data = await res.json();
             if (data.success) {
-                alert("âœ… Success! Your slot is booked. It will appear automatically.");
-                window.location.reload();
+                alert("✅ Success! Your slot is booked.");
+                window.location.href = "/seller/slots/history";
             } else {
-                alert("â Œ Verification Failed: " + data.msg);
+                alert("❌ Payment Verification Failed.");
             }
         } catch (err) {
             alert("Server Error during verification");
         }
     }
-</script>
-
+  </script>
 </body>
 </html>

@@ -48,7 +48,8 @@ router.post("/add", authMiddleware, sellerMiddleware, sellerController.addProduc
 
 router.get("/wallet", authMiddleware, sellerMiddleware, sellerController.renderWalletPage);
  
-
+// Is line ko routes file mein add kar
+router.get("/orders/print-label/:orderId", sellerController.printShippingLabel);
 // routes/seller/sellerRoutes.js mein add karo
 router.get("/daily-orders", authMiddleware, sellerMiddleware, sellerController.getDailyOrders);
 module.exports = router;

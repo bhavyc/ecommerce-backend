@@ -27,73 +27,86 @@ exports.getWalletData = async (req, res) => {
 
 // 2. Request Payout
 exports.requestPayout = async (req, res) => {
-  try {
-    const amount = parseFloat(req.body.amount);
-    // User ID nikalne ka sahi tarika
-    const sellerId = req.user ? (req.user.id || req.user._id) : null;
+    try {
+        const { amount } = req.body;
+        const sellerId = req.user ? (req.user.id || req.user._id) : null;
+        
+        const payoutAmount = parseFloat(amount);
 
-    if (!sellerId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
+        if (!payoutAmount || payoutAmount < 100) {
+            return res.status(400).json({ success: false, message: "Minimum payout amount is ₹100" });
+        }
 
-    // A. Validation
-    if (!amount || amount < 100) {
-      return res.status(400).json({ success: false, message: "Minimum withdrawal is ₹100" });
-    }
+        // FIX 1: Check if any PENDING request already exists
+        const existingRequest = await PayoutRequest.findOne({ 
+            seller: sellerId, 
+            status: "PENDING" 
+        });
 
-    // Dono Models fetch karo: User (Balance ke liye) aur Profile (Bank details ke liye)
-    const user = await User.findById(sellerId);
-    const profile = await SellerProfile.findOne({ seller: sellerId });
+        if (existingRequest) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Payout request already pending. Please wait for processing." 
+            });
+        }
 
-    // Check karo ki profile aur bank details hain ya nahi
-    if (!profile || !profile.bankAccountNo || !profile.ifscCode) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Bank details missing in your profile. Please update them first." 
-      });
-    }
+        // 1. Fetch User & Profile
+        const user = await User.findById(sellerId);
+        const profile = await SellerProfile.findOne({ seller: sellerId });
 
-    // B. Check Balance
-    if (user.walletBalance < amount) {
-      return res.status(400).json({ success: false, message: "Insufficient Wallet Balance" });
-    }
+        if (!user) return res.status(404).json({ success: false, message: "Seller not found" });
+        
+        // 2. Validate Bank Details
+        if (!profile || !profile.bankAccountNo || !profile.ifscCode) {
+            return res.status(400).json({ success: false, message: "Please complete your Bank Details in profile first." });
+        }
 
-    // C. Deduct Money from Wallet
-    user.walletBalance -= amount;
-    await user.save();
+        //  FIX 2: Atomic Balance Check (Strict)
+        if (user.walletBalance < payoutAmount) {
+            return res.status(400).json({ success: false, message: "Insufficient Wallet Balance" });
+        }
+         
+        //3.Create Payout Request
+        const payout = new PayoutRequest({
+            seller: sellerId,
+            amount: payoutAmount,
+            status: "PENDING",
+            bankDetails: {
+                accountName: profile.businessName || user.name,
+                accountNumber: profile.bankAccountNo,
+                ifsc: profile.ifscCode
+            }
+        });
 
-    // D. Create Payout Request Record
-    const payout = new PayoutRequest({
-      seller: sellerId, 
-      amount: amount,
-      status: "PENDING",
-      bankDetails: {
-        // 🔥 FIX: 'user' ki jagah 'profile' se data uthao
-        accountNumber: profile.bankAccountNo, 
-        ifsc: profile.ifscCode,
-        accountName: profile.businessName || user.name
-      }
-    });
-    await payout.save();
+        await payout.save();
 
-    // E. Transaction Log
-    if (typeof Transaction !== 'undefined') {
+        // 4. DEDUCT Balance Immediately
+        // Isse Seller negative mein nahi ja payega kyunki balance turant kat gaya
+        user.walletBalance -= payoutAmount;
+        await user.save();
+
+        // 5. Log Transaction
+        const Transaction = require("../../models/Transaction");
         await Transaction.create({
             user: sellerId,
-            amount: amount,
+            amount: payoutAmount,
             type: "DEBIT",
             description: `Payout Request #${payout._id.toString().slice(-6)}`,
             status: "PENDING",
             paymentGateway: "SYSTEM"
         });
+
+        res.status(200).json({ 
+            success: true, 
+            message: "Payout request submitted successfully. Amount is deducted from wallet.", 
+            payoutId: payout._id,
+            remainingBalance: user.walletBalance
+        });
+
+    } catch (err) {
+        console.error("Payout Request Error:", err);
+        res.status(500).json({ success: false, message: "Server error processing payout" });
     }
-
-    res.json({ success: true, message: "Payout requested successfully", remainingBalance: user.walletBalance });
-
-  } catch (err) {
-    console.error("Payout Error:", err);
-    res.status(500).json({ success: false, message: "Server error processing payout" });
-  }
 };
 // 3. Get History
 // controllers/seller/payoutController.js

@@ -20,13 +20,13 @@ const calculateTotal = (cart) => {
 
   // 1. Subtotal calculation (Discount apply karke)
   const subtotal = cart.items.reduce((sum, item) => {
-    // 🔥 Formula: Original Price - (Original Price * Discount / 100)
+    // Formula: Original Price - (Original Price * Discount / 100)
     const effectivePrice = item.price - (item.price * (item.discount / 100));
     return sum + (effectivePrice * item.quantity);
   }, 0);
 
   // 2. Delivery Fee (Hamesha apply hoga agar items hain)
-  const deliveryFee = subtotal > 0 ? 40 : 0;
+  const deliveryFee = 0
 
   // 3. Values set karo
   cart.subtotal = Math.round(subtotal);
@@ -47,12 +47,12 @@ exports.addToCart = async (req, res) => {
     const Model = getModelByType(itemType);
     if (!Model) return res.status(400).json({ success: false, message: "Invalid Item Type" });
 
-    // 🔥 FIX: Saare deals ke liye product ko populate karo taaki seller ID mil sake
+    //  FIX: Saare deals ke liye product ko populate karo taaki seller ID mil sake
     const itemData = await Model.findById(itemId).populate("product");
 
     if (!itemData) return res.status(404).json({ success: false, message: "Item not found" });
 
-    // 🔥 FIX: Seller ID nikalne ka fail-safe tareeka
+    // FIX: Seller ID nikalne ka fail-safe tareeka
     // 1. Pehle check karo kya direct deal mein seller hai?
     // 2. Agar nahi, toh linked product se nikal lo
     let sellerId = itemData.seller || (itemData.product ? itemData.product.seller : null);
@@ -106,7 +106,7 @@ exports.addToCart = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: err.message });
   }
 };
-// 🛒 GET CART
+//  GET CART
 exports.getCart = async (req, res) => {
   try {
     const userId = req.user ? (req.user.id || req.user._id) : null;
@@ -152,7 +152,7 @@ exports.removeItem = async (req, res) => {
   }
 };
 
-// 🧹 CLEAR CART
+//  CLEAR CART
 exports.clearCart = async (req, res) => {
   try {
     const userId = req.user._id;

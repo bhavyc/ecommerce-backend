@@ -1,82 +1,241 @@
-<!-- views/seller/dailyOrders.ejs -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Daily Orders - Filter</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .filter-section { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .order-card { transition: transform 0.2s; }
-        .order-card:hover { transform: scale(1.01); }
-    </style>
-</head>
-<body class="bg-light">
-    <div class="container mt-5">
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">📋 Order Management</h2>
-            <a href="/seller/dashboard" class="btn btn-outline-dark btn-sm">Dashboard</a>
-        </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Orders | Seller Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        <!-- 🔥 DATE FILTER FORM -->
-        <div class="filter-section">
-            <form action="/seller/daily-orders" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Select Date to View Orders:</label>
-                    <input type="date" name="date" class="form-control" value="<%= selectedDate %>">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
-                </div>
-                <div class="col-md-6 text-end">
-                    <span class="text-muted">Showing results for: <strong><%= new Date(selectedDate).toDateString() %></strong></span>
-                </div>
+  <style>
+    :root { --primary: #10b981; --bg-body: #f3f4f6; --sidebar-width: 260px; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; }
+    .sidebar { width: var(--sidebar-width); background: #1f2937; color: #fff; position: fixed; height: 100vh; padding-top: 20px; z-index: 1000; }
+    .nav-item { display: flex; align-items: center; padding: 12px 20px; color: #d1d5db; text-decoration: none; transition: 0.3s; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item i { margin-right: 12px; font-size: 20px; }
+    .main-content { margin-left: var(--sidebar-width); padding: 40px; }
+    .order-card { border: none; border-radius: 16px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .status-badge { font-size: 11px; padding: 6px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+    .item-box { background: #f9fafb; border-radius: 12px; padding: 12px; border: 1px dashed #e5e7eb; }
+    .product-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+    @media (max-width: 991.98px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="px-4 mb-4"><h4 class="text-success fw-bold">SellerPanel</h4></div>
+    <nav>
+      <a href="/seller/dashboard" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="/sellers/daily-orders" class="nav-item active"><i class='bx bxs-truck'></i> Daily Orders</a>
+      <a href="/sellers/returns" class="nav-item"><i class='bx bxs-undo'></i> Returns Management</a>
+      <a href="/seller/inventory" class="nav-item"><i class='bx bxs-box'></i> Inventory</a>
+      <a href="/seller/wallet" class="nav-item"><i class='bx bxs-wallet'></i> Wallet</a>
+      <a href="/seller/auth/logout" class="nav-item text-danger mt-5"><i class='bx bx-log-out'></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <h2 class="fw-bold mb-4">📦 Daily Order Shipments</h2>
+
+    <!-- Date Filter -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <form action="/sellers/daily-orders" method="GET" class="d-flex align-items-center gap-3">
+                <label class="small fw-bold text-muted">Select Date:</label>
+                <input type="date" name="date" class="form-control w-auto" value="<%= selectedDate %>" onchange="this.form.submit()">
             </form>
         </div>
+    </div>
 
-        <!-- ORDERS LIST -->
+    <div class="row">
         <% if (orders.length === 0) { %>
-            <div class="text-center mt-5">
-                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" width="80" class="opacity-25 mb-3">
-                <h4 class="text-muted">No Orders </h4>
-            </div>
+            <div class="col-12 text-center py-5"><h5>No orders found for this date.</h5></div>
         <% } else { %>
-            <% orders.forEach(order => { %>
-                <div class="card order-card mb-3 border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-3">
-                                <span class="badge bg-secondary mb-2">#<%= order._id.toString().slice(-6) %></span>
-                                <h6 class="mb-0 fw-bold"><%= order.customerName %></h6>
-                                <p class="small text-muted mb-1">📞 <%= order.phone %></p>
-                                <p class="small mb-0">🕒 Time: <%= order.time %></p>
-                            </div>
-                            <div class="col-md-5 border-start border-end">
-                                <p class="small fw-bold text-uppercase text-muted mb-2">Saman (My Items):</p>
-                                <% order.items.forEach(item => { %>
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="small"><%= item.title %> <strong>x<%= item.quantity %></strong></span>
-                                        <span class="small fw-bold">₹<%= item.subtotal %></span>
+            <% orders.forEach(order => { 
+                // Sirf is seller ke items filter karo (Multi-vendor protection)
+                const myItems = order.items.filter(it => it.seller.toString() === user._id.toString());
+                const myStatus = myItems[0]?.status || 'Pending';
+               const myEarning = myItems.reduce((s, i) => {
+    // 🔥 Formula: (Price - Discount Amount) * Quantity
+    const effectivePrice = i.price - (i.price * ((i.discount || 0) / 100));
+    return s + (effectivePrice * i.quantity);
+}, 0);
+            %>
+                <div class="col-12">
+                    <div class="card order-card">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <!-- Customer Column -->
+                                <div class="col-lg-3">
+                                    <h6 class="text-success fw-bold mb-1">#<%= order._id.toString().slice(-6).toUpperCase() %></h6>
+                                    <span class="status-badge <%= myStatus === 'Delivered' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' %> mb-2 d-inline-block">
+                                        <%= myStatus %>
+                                    </span>
+                                    <h5 class="fw-bold mb-0"><%= order.customerName %></h5>
+                                    <p class="small text-muted"><i class='bx bx-phone'></i> <%= order.phone %></p>
+                                </div>
+
+                                <!-- Items Column -->
+                                <div class="col-lg-4">
+                                    <div class="item-box">
+                                        <% myItems.forEach(item => { %>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center">
+                                                  <img src="<%= item.image %>" class="product-thumb me-2">
+                                                  <span class="text-truncate small" style="max-width: 130px;"><%= item.title %></span>
+                                                </div>
+                                                <span class="fw-bold small">x<%= item.quantity %></span>
+                                            </div>
+                                        <% }) %>
                                     </div>
-                                <% }) %>
-                            </div>
-                            <div class="col-md-4 text-center">
-                                <p class="small text-muted mb-1">Earning from this Order</p>
-                                <h4 class="text-success fw-bold">₹<%= order.grandTotal %></h4>
-                                <div class="mt-2">
-                                    <span class="badge rounded-pill bg-warning text-dark"><%= order.status %></span>
-                                    <button class="btn btn-sm btn-link text-primary">View Address</button>
+                                </div>
+
+                                <!-- Actions Column -->
+                                <div class="col-lg-5 text-lg-end">
+                                    <h3 class="fw-bold mb-3">₹<%= myEarning %></h3>
+                                    
+                                    <div class="d-flex gap-2 justify-content-lg-end">
+                                        <a href="/sellers/orders/print-label/<%= order._id %>" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3">Label</a>
+
+                                        <% if(myStatus === 'Processing' || myStatus === 'Pending'  ||  myStatus === 'Normal') { %>
+                                            <!-- 🔥 Dispatch Button -->
+                                            <button class="btn btn-sm btn-success rounded-pill px-4" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#shipModal<%= order._id %>">
+                                                Dispatch
+                                            </button>
+                                        <% } else if(myStatus === 'Shipped') { %>
+                                            <button class="btn btn-sm btn-info text-white rounded-pill px-4" disabled>In Transit</button>
+                                        <% } %>
+                                    </div>
+                                    <p class="small text-muted mt-3 mb-0"><i class='bx bx-map-pin'></i> <%= order.address %></p>
                                 </div>
                             </div>
                         </div>
-                        <!-- Address section (Hidden by default, can toggle with JS if needed) -->
-                        <div class="mt-3 p-2 bg-light rounded small">
-                            <strong>📍 Address:</strong> <%= order.address %>
+                    </div>
+                </div>
+
+                <!-- Dispatch Modal (Har order ke liye unique) -->
+                <div class="modal fade" id="shipModal<%= order._id %>" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                            <div class="modal-header bg-dark text-white border-0 py-3">
+                                <h5 class="modal-title fw-bold">Confirm Dispatch</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <label class="small fw-bold text-muted mb-2">DELIVERY METHOD</label>
+                                <select class="form-select mb-3" id="method-<%= order._id %>" onchange="toggleMethodFields('<%= order._id %>')">
+                                    <option value="SELF">Local Delivery Boy (WhatsApp OTP)</option>
+                                    <option value="COURIER">Courier Service (Receipt Upload)</option>
+                                </select>
+
+                                <!-- Local Boy Fields -->
+                                <div id="self-fields-<%= order._id %>">
+                                    <input type="text" id="boy-<%= order._id %>" class="form-control mb-2" placeholder="Boy Name">
+                                    <input type="tel" id="phone-<%= order._id %>" class="form-control" placeholder="WhatsApp Number">
+                                </div>
+
+                                <!-- Courier Fields -->
+                                <div id="courier-fields-<%= order._id %>" style="display:none;">
+                                    <input type="text" id="cname-<%= order._id %>" class="form-control mb-2" placeholder="Courier Name (Delhivery/BlueDart)">
+                                    <input type="text" id="tid-<%= order._id %>" class="form-control mb-2" placeholder="Tracking ID">
+                                    <label class="small fw-bold text-danger">Upload Courier Receipt*</label>
+                                    <input type="file" id="proof-<%= order._id %>" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 p-4 pt-0">
+                                <button type="button" id="btn-<%= order._id %>" class="btn btn-success w-100 py-3 fw-bold rounded-3" onclick="processShipment('<%= order._id %>')">
+                                    CONFIRM SHIPMENT
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             <% }) %>
         <% } %>
     </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Modal Toggle logic
+    function toggleMethodFields(id) {
+        const method = document.getElementById('method-' + id).value;
+        document.getElementById('self-fields-' + id).style.display = method === 'SELF' ? 'block' : 'none';
+        document.getElementById('courier-fields-' + id).style.display = method === 'COURIER' ? 'block' : 'none';
+    }
+
+    // 🔥 ASYNC DISPATCH LOGIC 🔥
+    async function processShipment(id) {
+        const method = document.getElementById('method-' + id).value;
+        const btn = document.getElementById('btn-' + id);
+        
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const formData = new FormData();
+        formData.append('orderId', id);
+        formData.append('method', method);
+
+        if (method === 'SELF') {
+            const boyName = document.getElementById('boy-' + id).value;
+            const boyPhone = document.getElementById('phone-' + id).value;
+            if(!boyName || !boyPhone) {
+                alert("Please fill Boy details!");
+                btn.disabled = false; btn.innerText = "CONFIRM SHIPMENT";
+                return;
+            }
+            formData.append('boyName', boyName);
+            formData.append('boyPhone', boyPhone);
+        } else {
+            const courierName = document.getElementById('cname-' + id).value;
+            const trackingId = document.getElementById('tid-' + id).value;
+            const fileInput = document.getElementById('proof-' + id);
+
+            if(!courierName || !trackingId || !fileInput.files[0]) {
+                alert("Courier details and Photo are mandatory!");
+                btn.disabled = false; btn.innerText = "CONFIRM SHIPMENT";
+                return;
+            }
+            formData.append('courierName', courierName);
+            formData.append('trackingId', trackingId);
+            formData.append('dispatchProof', fileInput.files[0]);
+        }
+
+        try {
+            // Check your path carefully: /sellers/order/dispatch
+            const res = await fetch('/sellers/order/dispatch', { 
+                method: 'POST',
+                body: formData 
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                if(method === 'SELF') {
+                    const boyPhone = document.getElementById('phone-' + id).value;
+                    const boyName = document.getElementById('boy-' + id).value;
+                    // 🔥 LINK MEIN SELLER ID ADDED 🔥
+                    const sellerId = "<%= user._id %>";
+                    const link = `${window.location.origin}/delivery/confirm/${id}?sellerId=${sellerId}`;
+                    const waMessage = `Hi ${boyName}, BharatMkt order assign hua hai. Link: ${link}`;
+                    window.open(`https://wa.me/91${boyPhone}?text=${encodeURIComponent(waMessage)}`, '_blank');
+                }
+                alert("Shipped Successfully!");
+                location.reload();
+            } else { 
+                alert("Error: " + data.message); 
+                btn.disabled = false; btn.innerText = "CONFIRM SHIPMENT";
+            }
+        } catch (err) { 
+            alert("Network Error!"); 
+            btn.disabled = false; btn.innerText = "CONFIRM SHIPMENT";
+        }
+    }
+  </script>
 </body>
 </html>

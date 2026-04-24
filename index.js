@@ -1,5 +1,6 @@
 require('dotenv').config(); // Load .env variables
-
+const Order = require("./models/Order");
+const Inventory = require("./models/Inventory");
 const express = require("express");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
@@ -14,7 +15,7 @@ const PayoutRequest = require("./models/PayoutRequest");
 const Drop = require("./models/FruitDrop");
 const { startAutomation, generateDailyDeals, generateDailyDrop } = require("./utils/automationEngine");
 const adminTransactionRoutes = require("./routes/admin/adminTransactionRoutes"); 
-
+ const mongoose = require('mongoose');
 // index.js ya app.js mein top par add kar
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -73,12 +74,12 @@ const app = express();
 // app.use("/api/", limiter);
 
 // 4. Maintenance: Har raat 3 baje User model se purana 'seenDrops' data saaf karo
-
+ 
 
 // ------------------ CONNECT DATABASE & START AUTOMATION ------------------
-// 🔥 FIX: Wait for DB connection before running generators
+// FIX: Wait for DB connection before running generators
 connectDB().then(async () => {
-  console.log("✅ Database Connected. Initializing Automation Flow...");
+  console.log("Database Connected. Initializing Automation Flow...");
   
   startAutomation(); // Start cron schedules
   
@@ -160,7 +161,15 @@ app.get("/", (req, res) => {
 });
 
 app.get("/admin", (req, res) => res.redirect("/admin/login"));
+ 
+app.get("/delivery/confirm/:orderId", (req, res) => {
+    res.render("delivery/confirm", { orderId: req.params.orderId });
+});
 
+app.get("/delivery/verify-return/:orderId", (req, res) => {
+    // Ye 'verifyPickup'   views/delivery/verifyPickup.ejs file  
+    res.render("delivery/verifyPickup", { orderId: req.params.orderId });
+});
 // ------------------ CRON JOBS ------------------
 
 // 1. Cleanup expired drops
@@ -184,6 +193,40 @@ cron.schedule('0 * * * *', async () => {
   await syncPendingOrders(null, null); 
 });
 
+
+// AUTO-DELIVERY CONFIRMATION JOB (Har raat 2 baje chalegi)
+cron.schedule('0 2 * * *', async () => {
+    console.log("Checking for orders that need Auto-Confirmation...");
+    try {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+        const ordersToAutoConfirm = await Order.find({
+            orderStatus: "Shipped",
+            "deliveryDetails.deliveryMethod": "COURIER",
+            "deliveryDetails.dispatchedAt": { $lte: sevenDaysAgo }
+        });
+
+        for (const order of ordersToAutoConfirm) {
+            // Logic to mark as Delivered
+            order.orderStatus = "Delivered";
+            order.deliveryDetails.deliveredAt = new Date();
+            await order.save();
+
+            // 15 din ka payout timer shuru karo (Same as manual confirmation)
+            const releaseDate = new Date();
+            releaseDate.setDate(releaseDate.getDate() + 15);
+
+            await Transaction.updateMany(
+                { orderId: order._id, type: "CREDIT" },
+                { status: "ON_HOLD", releaseDate: releaseDate }
+            );
+            
+            console.log(`Auto-Confirmed Order #${order._id.toString().slice(-6)}`);
+        }
+    } catch (err) {
+        console.error("Auto-Confirm Job Error:", err);
+    }
+});
 
 
 cron.schedule('0 3 * * *', async () => {
@@ -220,6 +263,57 @@ cron.schedule('0 0 * * *', async () => {
   } catch (err) {
     console.error("Release Job Error:", err);
   }
+});
+
+
+
+
+cron.schedule('*/5 * * * *', async () => { // Runs every 5 minutes
+    console.log("Checking for expired stock reservations...");
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+
+    try {
+        const now = new Date();
+        // Find orders that:
+        // 1. Are Online
+        // 2. Haven't paid yet
+        // 3. Have reserved stock
+        // 4. Have expired reservations
+        const expiredOrders = await Order.find({
+            paymentMethod: "ONLINE",
+            paymentStatus: "PENDING",
+            isStockReserved: true,
+            reservationExpiry: { $lte: now }
+        }).session(session);
+
+        for (const order of expiredOrders) {
+            for (const item of order.items) {
+                // Logic to find actual product ID (same as reservation logic)
+                // ... find actualProductId ...
+
+                // RESTORE STOCK
+                await Inventory.findOneAndUpdate(
+                    { product: actualProductId, seller: item.seller },
+                    { $inc: { remaining: item.quantity, sold: -item.quantity } },
+                    { session }
+                );
+            }
+
+            order.isStockReserved = false;
+            order.orderStatus = "Payment_Failed";
+            order.paymentStatus = "FAILED";
+            await order.save({ session });
+            console.log(`Released stock for abandoned Order #${order._id}`);
+        }
+        await session.commitTransaction();
+    } catch (err) {
+        await session.abortTransaction();
+        console.error("Stock Release Cron Error:", err);
+    } finally {
+        session.endSession();
+    }
 });
 
 // ------------------ START SERVER ------------------

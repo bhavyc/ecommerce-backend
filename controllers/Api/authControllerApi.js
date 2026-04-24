@@ -134,11 +134,11 @@ exports.getProfile = async (req, res) => {
         return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // 3. 🔥 AUTOMATIC EXPIRY CHECK (Ab properties access karna safe hai)
+    // 3. AUTOMATIC EXPIRY CHECK (Ab properties access karna safe hai)
     if (user.isMember && user.membershipExpiry && new Date() > new Date(user.membershipExpiry)) {
       user.isMember = false;
       await user.save(); 
-      console.log(`Membership expired for user: ${user.name}`);
+      
     }
 
     // 4. Baki ka data fetch karo
@@ -191,12 +191,12 @@ exports.forgotPassword = async (req, res) => {
 
     // 🔥 2. REAL EMAIL SENDING LOGIC
     const mailOptions = {
-      from: `"BharatMart Support" <${process.env.EMAIL_USER}>`,
+      from: `"BharatMkt Support" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Password Reset OTP - BharatMart",
+      subject: "Password Reset OTP - BharatMkt",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
-          <h2 style="color: #000080;">BharatMart Password Reset</h2>
+          <h2 style="color: #000080;">BharatMkt Password Reset</h2>
           <p>Your 4-digit OTP for password reset is:</p>
           <h1 style="color: #FF9933; letter-spacing: 5px;">${otp}</h1>
           <p>This OTP is valid for 10 minutes only.</p>

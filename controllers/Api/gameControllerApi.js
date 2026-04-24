@@ -29,17 +29,17 @@ exports.waterTree = async (req, res) => {
       // Stages: 0(Seed) -> 1(Sapling) -> 2(Tree) -> 3(Fruit) -> 4(HARVEST)
       if (user.game.treeStage > 3) {
         
-        console.log(`🎉 HARVEST! User ${user.name} earned ₹50`); // Debug Log
+         
 
         // Reset Tree
         user.game.treeStage = 0; 
         
-        // 💰 REWARD ADD KARO (Safety Check ke saath)
+        //  REWARD ADD KARO (Safety Check ke saath)
         const currentBalance = user.walletBalance || 0; // Agar undefined hai to 0 lo
         user.walletBalance = currentBalance + 50;
 await sendNotification(
   userId, 
-  "Tree Harvested! 🍎", 
+  "Tree Harvested! ", 
   "Congratulations! You earned ₹50 from your tree harvest.", 
   "GAME"
 );

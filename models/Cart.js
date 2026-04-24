@@ -33,7 +33,8 @@ cartSchema.pre("save", function(next) {
   }, 0);
 
   // ✅ FIXED DELIVERY FEE LOGIC
-  this.deliveryFee = this.subtotal > 0 ? 40 : 0; 
+  this.deliveryFee = 0; 
+   
 
   this.totalAmount = Math.round(this.subtotal + this.deliveryFee);
   this.updatedAt = Date.now();

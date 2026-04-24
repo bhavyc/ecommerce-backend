@@ -8,7 +8,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
   
-  <!-- Icons -->
+  <!-- Icons (Boxicons) -->
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   
   <!-- Chart.js -->
@@ -101,7 +101,7 @@
     }
 
     .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; }
-    .nav-item i { font-size: 20px; margin-right: 12px; }
+    .nav-item i { font-size: 20px; margin-right: 12px; width: 20px; text-align: center; }
 
     .cta-container {
       padding: 20px;
@@ -211,21 +211,6 @@
     .bg-purple { background: #f3e8ff; color: #9333ea; }
     .bg-orange { background: #ffedd5; color: #ea580c; }
 
-    .deals-overview { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
-    .deal-pill {
-      background: #fff;
-      border: 1px solid var(--border);
-      padding: 8px 16px;
-      border-radius: 50px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .deal-pill b { color: var(--primary-dark); }
-
     .charts-wrapper {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -241,8 +226,6 @@
       width: 100%;
     }
     .chart-container-inner { position: relative; height: 250px; width: 100%; }
-    .chart-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .chart-header h3 { font-size: 18px; }
 
     /* ================= TABLE & SCROLLBAR FIX ================= */
     .table-section {
@@ -251,90 +234,30 @@
       box-shadow: var(--shadow);
       margin-bottom: 30px;
       width: 100%;
-      overflow: hidden; /* Ensures border-radius holds */
-    }
-    
-    .table-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      overflow: hidden;
     }
 
-    /* Modern Slim Scrollbar Logic */
     .table-responsive { 
       width: 100%; 
       overflow-x: auto; 
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin; /* Firefox */
+      scrollbar-width: thin;
       scrollbar-color: #cbd5e1 transparent;
     }
 
     .table-responsive::-webkit-scrollbar { height: 6px; }
-    .table-responsive::-webkit-scrollbar-track { background: transparent; }
-    .table-responsive::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 10px;
-    }
-    .table-responsive::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    .table-responsive::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
 
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      min-width: 600px; /* Forces scroll only on mobile */
-      white-space: nowrap; /* Prevents wrapping causing height issues */
-    }
-    
-    th {
-      text-align: left;
-      padding: 16px 24px;
-      background: #f9fafb;
-      color: var(--text-muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f9fafb; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; white-space: nowrap; }
+    th { text-align: left; padding: 16px 24px; background: #f9fafb; color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
-    .product-info { display: flex; align-items: center; gap: 12px; }
-    .product-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
-    .product-name { font-weight: 600; color: var(--text-main); }
-    
-    .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-    .badge-success { background: var(--primary-light); color: var(--primary-dark); }
-    .badge-warning { background: #fff7ed; color: #c2410c; }
-    
-    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; background: var(--text-main); color: #fff; font-weight: 500; }
-
-    /* Alert */
-    .alert-box {
-      background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 20px; margin-bottom: 30px;
-    }
-    .alert-header { display: flex; align-items: center; gap: 10px; color: var(--danger); margin-bottom: 10px; }
-    .low-item-list { display: flex; flex-wrap: wrap; gap: 10px; }
-    .low-item-chip { background: #fff; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 20px; font-size: 13px; color: #b91c1c; }
-
-    /* ================= MEDIA QUERIES ================= */
+    /* Responsive Queries */
     @media (max-width: 1024px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
       .main-content { margin-left: 0; width: 100%; padding: 20px; }
       .mobile-menu-toggle { display: block; }
-    }
-
-    @media (max-width: 768px) {
-      header { flex-direction: column; align-items: flex-start; }
-      .header-left { width: 100%; justify-content: flex-start; }
-      .header-actions { width: 100%; margin-top: 10px; }
-      .action-btn { width: 100%; justify-content: center; }
-      .charts-wrapper { grid-template-columns: 1fr; }
-      .chart-container-inner { height: 200px; }
     }
   </style>
 </head>
@@ -353,24 +276,30 @@
       <a href="/seller/dashboard" class="nav-item active">
         <i class='bx bxs-dashboard'></i> Dashboard
       </a>
-      <!-- dashboard.ejs mein kahin bhi add kar do -->
-<a href="/seller/daily-orders" class="nav-item">  <i class='bx bxs-box'></i>Check Today's Orders</a>
+      
+      <a href="/seller/daily-orders" class="nav-item">
+        <i class='bx bxs-truck'></i> Today's Orders
+      </a>
+
+      <a href="/sellers/returns" class="nav-item">
+        <i class='bx bx-undo'></i> Return Requests
+      </a>
+
       <a href="/seller/inventory" class="nav-item">
         <i class='bx bxs-box'></i> Inventory
       </a>
+
       <a href="/seller/add" class="nav-item">
         <i class='bx bx-plus-circle'></i> Add Product
       </a>
-      <a href="/sellers/products/bulk-upload" class="nav-item">
-        <i class='bx bx-upload'></i> Bulk Upload
-      </a>
+      
       <a href="/seller/wallet" class="nav-item">
         <i class='bx bxs-wallet'></i> Wallet
       </a>
 
       <a href="/seller/slots/history" class="nav-item">
-    <i class='bx bxs-time-five'></i> Slot History
-</a>
+        <i class='bx bxs-time-five'></i> Slot History
+      </a>
     </nav>
 
     <div class="cta-container">
@@ -390,28 +319,28 @@
         <i class='bx bx-menu mobile-menu-toggle' onclick="toggleSidebar()"></i>
         <div class="user-welcome">
           <h2>Hello, <%= typeof user !== 'undefined' && user.name ? user.name : 'Seller' %> </h2>
-          <span>Here is what's happening today.</span>
+          <span>Manage your business efficiently today.</span>
         </div>
       </div>
-      <div class="header-actions">
-        <a href="/seller/inventory/add" class="action-btn primary">
+      <!-- <div class="header-actions">
+        <a href="/seller/inventory/add" class="action-btn">
           <i class='bx bx-plus'></i> Add Stock
         </a>
-      </div>
+      </div> -->
     </header>
 
     <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-info">
-          <h4>Total Revenue</h4>
+          <h4>Revenue</h4>
           <p>₹<%= typeof revenue !== 'undefined' ? revenue : 0 %></p>
         </div>
         <div class="stat-icon bg-green"><i class='bx bx-rupee'></i></div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
-          <h4>Total Orders</h4>
+          <h4>Orders</h4>
           <p><%= typeof totalOrders !== 'undefined' ? totalOrders : 0 %></p>
         </div>
         <div class="stat-icon bg-blue"><i class='bx bx-shopping-bag'></i></div>
@@ -425,64 +354,45 @@
       </div>
       <div class="stat-card">
         <div class="stat-info">
-          <h4>Total Stock</h4>
+          <h4>Stock</h4>
           <p><%= typeof stockCount !== 'undefined' ? stockCount : 0 %></p>
         </div>
         <div class="stat-icon bg-orange"><i class='bx bx-layer'></i></div>
       </div>
     </div>
 
-    <!-- Deals -->
-    <div class="deals-overview">
-      <div class="deal-pill"><i class='bx bx-check-circle'></i> Normal: <b><%= typeof normalDeals !== 'undefined' ? normalDeals : 0 %></b></div>
-      <div class="deal-pill"><i class='bx bxs-time'></i> 24Hr Deals: <b><%= typeof timedDeals !== 'undefined' ? timedDeals : 0 %></b></div>
-      <div class="deal-pill"><i class='bx bxs-hot'></i> Drops: <b><%= typeof dropDeals !== 'undefined' ? dropDeals : 0 %></b></div>
-    </div>
-
     <!-- Low Stock Alert -->
     <% if (typeof lowStock !== 'undefined' && lowStock && lowStock.length) { %>
-      <div class="alert-box">
-        <div class="alert-header">
-          <i class='bx bxs-error-circle'></i>
-          <h3>Low Stock Alert</h3>
-        </div>
-        <div class="low-item-list">
-          <% lowStock.forEach(i => { %>
-            <div class="low-item-chip">
-              <%= i.product ? i.product.title : 'Item' %>: <b><%= i.remaining %> left</b>
-            </div>
-          <% }) %>
-        </div>
+      <div style="background: #fef2f2; border: 1px solid #fee2e2; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+        <h4 style="color: #ef4444; margin-bottom: 10px;"><i class='bx bxs-error'></i> Low Stock Alert</h4>
+        <% lowStock.forEach(i => { %>
+          <span style="display:inline-block; background:#fff; padding:5px 10px; border-radius:20px; margin-right:10px; font-size:12px; border:1px solid #fecaca;">
+            <%= i.product ? i.product.title : 'Item' %>: <b><%= i.remaining %> left</b>
+          </span>
+        <% }) %>
       </div>
     <% } %>
 
     <!-- Charts -->
     <div class="charts-wrapper">
       <div class="chart-card">
-        <div class="chart-header">
-          <h3>Revenue</h3>
-          <i class='bx bx-line-chart' style="color:var(--primary); font-size:20px;"></i>
-        </div>
+        <h3>Revenue Trend</h3>
         <div class="chart-container-inner">
           <canvas id="salesChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <h3>Top Products</h3>
-          <i class='bx bx-bar-chart-alt-2' style="color:var(--primary); font-size:20px;"></i>
-        </div>
+        <h3>Top Products</h3>
         <div class="chart-container-inner">
           <canvas id="topProductsChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Inventory Table (UPDATED FIX) -->
+    <!-- Inventory Table -->
     <div class="table-section">
-      <div class="table-header">
-        <h3>Inventory Status</h3>
-        <a href="/seller/inventory" style="font-size:13px; color:var(--primary); font-weight:600;">View All</a>
+      <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
+        <h3 style="font-size: 18px;">Inventory Status</h3>
       </div>
       <div class="table-responsive">
         <table>
@@ -500,35 +410,21 @@
               <% inventory.forEach(item => { %>
                 <tr>
                   <td>
-                    <div class="product-info">
-                      <% if (item.product && item.product.image) { %>
-                        <img src="<%= item.product.image %>" class="product-thumb" alt="Img">
-                      <% } else { %>
-                        <div class="product-thumb" style="background:#eee; display:flex; align-items:center; justify-content:center;"><i class='bx bx-image'></i></div>
-                      <% } %>
-                      <span class="product-name"><%= item.product ? item.product.title : 'Unknown' %></span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <img src="<%= item.product.image %>" style="width:35px; height:35px; border-radius:6px; object-fit:cover;">
+                      <b><%= item.product.title %></b>
                     </div>
                   </td>
                   <td><%= item.sold %></td>
                   <td><%= item.remaining %></td>
                   <td>
-                    <% if(item.remaining < 5) { %>
-                      <span class="status-badge badge-warning">Low Stock</span>
-                    <% } else { %>
-                      <span class="status-badge badge-success">In Stock</span>
-                    <% } %>
+                    <span style="padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; background:<%= item.remaining < 5 ? '#fff7ed' : '#d1fae5' %>; color:<%= item.remaining < 5 ? '#c2410c' : '#059669' %>">
+                      <%= item.remaining < 5 ? 'LOW' : 'OK' %>
+                    </span>
                   </td>
-                  <td>
-                    <a href="/seller/inventory/restock/<%= item._id %>" class="btn-sm">Restock</a>
-                  </td>
+                  <td><a href="/seller/inventory/restock/<%= item._id %>" style="font-size:12px; color:var(--primary); font-weight:700;">Restock</a></td>
                 </tr>
               <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
-                  No inventory found.
-                </td>
-              </tr>
             <% } %>
           </tbody>
         </table>
@@ -536,87 +432,35 @@
     </div>
   </main>
 
-  <!-- Data & Scripts -->
-  <script id="chart-data" type="application/json">
-    {
-      "months": <%- JSON.stringify(typeof months !== 'undefined' ? months : []) %>,
-      "salesData": <%- JSON.stringify(typeof salesData !== 'undefined' ? salesData : []) %>,
-      "topProductNames": <%- JSON.stringify(typeof topProductNames !== 'undefined' ? topProductNames : []) %>,
-      "topProductSales": <%- JSON.stringify(typeof topProductSales !== 'undefined' ? topProductSales : []) %>
-    }
-  </script>
-
+  <!-- Script for Mobile Toggle & Charts -->
   <script>
     function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('active');
     }
 
-    try {
-        const rawData = document.getElementById('chart-data').textContent;
-        const chartData = JSON.parse(rawData);
-
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.color = '#6b7280';
-        Chart.defaults.maintainAspectRatio = false;
-
-        const ctx1 = document.getElementById('salesChart');
-        if(ctx1) {
-            new Chart(ctx1, {
+    // Chart logic initialization
+    const chartData = JSON.parse(`<%- JSON.stringify(typeof months !== 'undefined' ? { months, salesData, topProductNames, topProductSales } : {}) %>`);
+    
+    if(chartData.months) {
+        new Chart(document.getElementById('salesChart'), {
             type: 'line',
             data: {
                 labels: chartData.months,
-                datasets: [{
-                label: 'Revenue',
-                data: chartData.salesData,
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 2,
-                pointRadius: 4,
-                tension: 0.4,
-                fill: true
-                }]
+                datasets: [{ data: chartData.salesData, borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
-                x: { grid: { display: false } }
-                }
-            }
-            });
-        }
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
 
-        const ctx2 = document.getElementById('topProductsChart');
-        if(ctx2) {
-            new Chart(ctx2, {
+        new Chart(document.getElementById('topProductsChart'), {
             type: 'bar',
             data: {
                 labels: chartData.topProductNames,
-                datasets: [{
-                label: 'Units',
-                data: chartData.topProductSales,
-                backgroundColor: '#34d399',
-                borderRadius: 4
-                }]
+                datasets: [{ data: chartData.topProductSales, backgroundColor: '#34d399' }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
-                x: { grid: { display: false } }
-                }
-            }
-            });
-        }
-    } catch(e) { console.error("Chart error:", e); }
+            options: { plugins: { legend: { display: false } } }
+        });
+    }
   </script>
 </body>
 </html>
-

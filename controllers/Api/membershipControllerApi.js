@@ -59,7 +59,7 @@ exports.verifyMembership = async (req, res) => {
       membershipExpiry: expiryDate
     });
 
-    // 3. 🔥 TRANSACTION RECORD (Yahan galti thi)
+    // 3.  TRANSACTION RECORD (Yahan galti thi)
     await Transaction.create({
       user: userId, // <--- Yeh line check kar, "user" field hona zaroori hai
       amount: 99,   // Membership price
@@ -72,7 +72,7 @@ exports.verifyMembership = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
-      message: "Membership Activated Successfully! 🌟" 
+      message: "Membership Activated Successfully! " 
     });
 
   } catch (err) {

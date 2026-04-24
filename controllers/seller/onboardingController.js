@@ -2,10 +2,7 @@
 const User = require("../../models/User");
 const SellerProfile = require("../../models/SellerProfile");
 const SellerKyc = require("../../models/SellerKyc");
-const { validatePAN } = require("../../services/kyc/panService");
-const { validateGSTIN } = require("../../services/kyc/gstService");
-const { verifyBank } = require("../../services/kyc/bankService");
-
+const SellerDocument = require("../../models/SellerDocument"); 
 // GET: Signup page (email, phone, password)
 exports.getSignup = (req, res) => {
   res.render("seller/onboarding/signup");
@@ -121,31 +118,63 @@ exports.getDocuments = async (req, res) => {
 // POST: Document Upload (no OCR, just store file paths)
 exports.postDocuments = async (req, res) => {
   try {
-    const kyc = await SellerKyc.findOne({ user: req.user._id });
+    const userId = req.user._id;
+    const kyc = await SellerKyc.findOne({ user: userId });
+    
     if (!kyc) return res.status(400).send("KYC not found. Complete previous steps first.");
 
-    // multer will attach req.files / req.file
     const { govIdType } = req.body;
     kyc.govIdType = govIdType;
-    if (req.files?.govIdFile?.[0]) kyc.govIdFile = "/uploads/" + req.files.govIdFile[0].filename;
-    if (req.files?.businessProofFile?.[0]) kyc.businessProofFile = "/uploads/" + req.files.businessProofFile[0].filename;
-    if (req.files?.addressProofFile?.[0]) kyc.addressProofFile = "/uploads/" + req.files.addressProofFile[0].filename;
-    if (req.files?.msmeOrShopLicense?.[0]) kyc.msmeOrShopLicense = "/uploads/" + req.files.msmeOrShopLicense[0].filename;
 
-    // mark docs for review
+    const filesToSave =[]; // Admin view ke liye data ikattha karenge
+
+    // 🔥 Multer-Cloudinary me URL hamesha 'file.path' me aata hai
+    if (req.files?.govIdFile?.[0]) {
+      const fileUrl = req.files.govIdFile[0].path;
+      kyc.govIdFile = fileUrl;
+      filesToSave.push({ seller: userId, docType: govIdType || "Government ID", filePath: fileUrl });
+    }
+    
+    if (req.files?.businessProofFile?.[0]) {
+      const fileUrl = req.files.businessProofFile[0].path;
+      kyc.businessProofFile = fileUrl;
+      filesToSave.push({ seller: userId, docType: "Business Proof", filePath: fileUrl });
+    }
+    
+    if (req.files?.addressProofFile?.[0]) {
+      const fileUrl = req.files.addressProofFile[0].path;
+      kyc.addressProofFile = fileUrl;
+      filesToSave.push({ seller: userId, docType: "Address Proof", filePath: fileUrl });
+    }
+    
+    if (req.files?.msmeOrShopLicense?.[0]) {
+      const fileUrl = req.files.msmeOrShopLicense[0].path;
+      kyc.msmeOrShopLicense = fileUrl;
+      filesToSave.push({ seller: userId, docType: "MSME / Shop License", filePath: fileUrl });
+    }
+
+    // 🔥 SellerDocument Database me Save karein (Jo Admin Panel fetch kar raha hai)
+    if (filesToSave.length > 0) {
+      // Purane docs delete kar do agar user dobara upload kar raha hai
+      await SellerDocument.deleteMany({ seller: userId });
+      // Naye Cloudinary URL wale docs save karo
+      await SellerDocument.insertMany(filesToSave);
+    }
+
+    // Mark docs for review
     kyc.documentStatus = "UNDER_REVIEW";
     await kyc.save();
 
     // Move user to UNDER_REVIEW globally
     await User.updateOne(
-      { _id: req.user._id },
+      { _id: userId },
       { verificationStatus: "UNDER_REVIEW" }
     );
 
     res.redirect("/seller/onboarding/review");
   } catch (e) {
-    console.error(e);
-    res.status(500).send("Error uploading documents");
+    console.error("Document Upload Error:", e);
+    res.status(500).send("Error uploading documents to Cloudinary");
   }
 };
 
@@ -162,3 +191,7 @@ exports.underReview = async (req, res) => {
   const profile = await SellerProfile.findOne({ seller: req.user._id });
   res.render("seller/underReview", { user: req.user, profile });
 };
+
+
+
+ 

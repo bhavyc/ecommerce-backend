@@ -23,7 +23,7 @@ exports.viewSellerDetails = async (req, res) => {
     // 🔥 Important: Seller ki ID se documents nikalna
     const documents = await SellerDocument.find({ seller: profile.seller._id });
     
-    console.log("Found Documents:", documents); // Console mein check karo data aa raha hai ya nahi
+     // Console mein check karo data aa raha hai ya nahi
 
     res.render("admin/seller/sellerDetails", { profile, documents });
   } catch (err) {
@@ -44,7 +44,7 @@ exports.approveSeller = async (req,res) => {
     user.verificationStatus = "APPROVED";
     await user.save();
 
-    res.redirect("/api/admin/sellers/pending");
+    res.redirect("/admin/sellers/pending");
   } catch(err) {
     console.error(err);
     res.status(500).send("Server error");
@@ -68,9 +68,9 @@ exports.rejectSeller = async (req, res) => {
     // 3️⃣ Delete seller user
     await User.deleteOne({ _id: sellerId });
 
-    console.log(`Seller ${profile.seller.email} and all related data deleted`);
+     
 
-    res.redirect("/api/admin/sellers/pending");
+    res.redirect("/admin/sellers/pending");
   } catch (err) {
     console.error("Reject Seller Error:", err);
     res.status(500).send("Server error while rejecting seller");
